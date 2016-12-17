@@ -33,9 +33,9 @@ public class PlayerGradeScript : MonoBehaviour
     {
     }
 
-    void OnCollisionEnter2D(Collision2D coll)
+    void OnTriggerEnter2D(Collider2D coll)
     {
-        print("Collision");
+        Debug.Log("Collision");
         switch (coll.gameObject.tag)
         {
             case "Homework":
