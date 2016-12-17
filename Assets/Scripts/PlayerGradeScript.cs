@@ -11,7 +11,7 @@ public class PlayerGradeScript : MonoBehaviour
     /// </summary>
     private int _grade;
 
-    public String[] Grades;
+
     public Color[] GradeColors;
 
     // Use this for initialization
@@ -53,8 +53,11 @@ public class PlayerGradeScript : MonoBehaviour
 
     private void UpdateGradeDisplay()
     {
-        if (-_grade >= 0 && -_grade < Grades.Length && -_grade < GradeColors.Length)
+        var CurrentGrade = GradeInfo.CalculateGradeLevel(_grade, true);
+        if (CurrentGrade != GradeInfo.GradeLevel.None)
         {
+            GradeDisplay.text = CurrentGrade.ToString();
+            GradeDisplay.color = Color.cyan;
         }
         else
         {
