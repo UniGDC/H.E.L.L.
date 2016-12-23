@@ -3,15 +3,7 @@ using System.Collections;
 
 public class HomeworkController : MonoBehaviour
 {
-    /// <summary>
-    /// THe player object, used to keep track of the player position.
-    /// </summary>
-    private GameObject _player;
-
-    public GameObject Player
-    {
-        set { _player = value; }
-    }
+    public GameObject Player;
 
     /// <summary>
     /// Indicates whether the homework has launched.
@@ -59,7 +51,7 @@ public class HomeworkController : MonoBehaviour
 
     void LaunchToPlayer()
     {
-        Vector2 positionDifference = _player.transform.position - gameObject.transform.position;
+        Vector2 positionDifference = Player.transform.position - gameObject.transform.position;
         gameObject.GetComponent<Rigidbody2D>().velocity = positionDifference.normalized * LaunchSpeed;
     }
 }

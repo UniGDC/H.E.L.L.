@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
-public class PlayerGradeScript : MonoBehaviour
+public class PlayerGrade : MonoBehaviour
 {
     public Text GradeDisplay;
     /// <summary>
