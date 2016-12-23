@@ -5,7 +5,6 @@ public class HomeworkLauncher : MonoBehaviour
 {
     public GameObject HomeworkPrefab;
     public GameObject Player;
-    public float Speed;
 
     // Use this for initialization
     void Start()
@@ -21,10 +20,11 @@ public class HomeworkLauncher : MonoBehaviour
     void LaunchHomework()
     {
         GameObject newHomework = Instantiate(HomeworkPrefab);
-        newHomework.transform.position += new Vector3(-3 + Random.value * 6, 0, 0);
 
-        newHomework.GetComponent<Rigidbody2D>().velocity =
-            (Player.transform.position - newHomework.transform.position).normalized * Speed;
-        Destroy(newHomework, 10F);
+        float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
+        newHomework.transform.position = new Vector2(-halfWidth + Random.value * halfWidth * 2,
+            -Camera.main.orthographicSize - newHomework.GetComponent<SpriteRenderer>().bounds.size.y / 2);
+
+        newHomework.GetComponent<HomeworkController>().Player = Player;
     }
 }

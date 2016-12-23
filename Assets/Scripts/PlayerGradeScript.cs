@@ -35,12 +35,10 @@ public class PlayerGradeScript : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D coll)
     {
-        Debug.Log("Collision");
         switch (coll.gameObject.tag)
         {
             case "Homework":
             case "Test":
-                print("Collision");
                 Destroy(coll.gameObject);
                 _grade--;
                 break;
