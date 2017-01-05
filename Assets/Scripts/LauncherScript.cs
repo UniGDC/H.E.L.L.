@@ -8,7 +8,7 @@ public class LauncherScript : MonoBehaviour
     public GameObject FinalPrefab;
     public GameObject Player;
 
-    public float FinalStartTime;
+    public float FinalStartTime = 60F;
 
     // Use this for initialization
     void Start()
@@ -49,6 +49,10 @@ public class LauncherScript : MonoBehaviour
         // Cancel all homework and test launching
         CancelInvoke();
 
-        // TODO Create and launch the final prefab
+        GameObject finalTest = Instantiate(FinalPrefab);
+
+        float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
+        finalTest.transform.position = new Vector3(0,
+            Camera.main.orthographicSize + finalTest.GetComponent<Sprite>().bounds.size.y / 2, 0);
     }
 }
