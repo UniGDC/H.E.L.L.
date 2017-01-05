@@ -21,7 +21,7 @@ public class TestController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, VerticalSpeed);
+        gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, -VerticalSpeed);
     }
 
     void FixedUpdate()
