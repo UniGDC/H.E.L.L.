@@ -8,13 +8,16 @@ public class LauncherScript : MonoBehaviour
     public GameObject FinalPrefab;
     public GameObject Player;
 
+    public float HomeworkInterval = 4F;
+    public float TestInterval = 10F;
     public float FinalStartTime = 60F;
 
     // Use this for initialization
     void Start()
     {
-        InvokeRepeating("LaunchHomework", 5F, 4F);
-        InvokeRepeating("LaunchTest", 6F, 6F);
+        InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
+        InvokeRepeating("LaunchTest", TestInterval, TestInterval);
+        Invoke("StartFinal", FinalStartTime);
     }
 
     // Update is called once per frame
@@ -51,8 +54,7 @@ public class LauncherScript : MonoBehaviour
 
         GameObject finalTest = Instantiate(FinalPrefab);
 
-        float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
-        finalTest.transform.position = new Vector3(0,
-            Camera.main.orthographicSize + finalTest.GetComponent<Sprite>().bounds.size.y / 2, 0);
+        finalTest.transform.position = new Vector2(0,
+            Camera.main.orthographicSize + finalTest.GetComponent<SpriteRenderer>().bounds.size.y / 2);
     }
 }
