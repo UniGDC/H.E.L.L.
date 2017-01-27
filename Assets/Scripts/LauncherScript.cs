@@ -30,7 +30,7 @@ public class LauncherScript : MonoBehaviour
         GameObject newHomework = Instantiate(HomeworkPrefab);
 
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
-        newHomework.transform.position = new Vector2(-halfWidth + Random.value * halfWidth * 2,
+        newHomework.transform.position = new Vector2(Random.Range(-halfWidth, halfWidth),
             Camera.main.orthographicSize + newHomework.GetComponent<SpriteRenderer>().bounds.size.y / 2);
 
         newHomework.GetComponent<HomeworkController>().Player = Player;
@@ -41,7 +41,7 @@ public class LauncherScript : MonoBehaviour
         GameObject newTest = Instantiate(TestPrefab);
 
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
-        newTest.transform.position = new Vector2(-halfWidth + Random.value * halfWidth * 2,
+        newTest.transform.position = new Vector2(Random.Range(-halfWidth, halfWidth),
             Camera.main.orthographicSize + newTest.GetComponent<SpriteRenderer>().bounds.size.y / 2);
 
         newTest.GetComponent<TestController>().Player = Player;
@@ -53,6 +53,8 @@ public class LauncherScript : MonoBehaviour
         CancelInvoke();
 
         GameObject finalTest = Instantiate(FinalPrefab);
+
+        finalTest.GetComponent<FinalController>().Player = Player;
 
         finalTest.transform.position = new Vector2(0,
             Camera.main.orthographicSize + finalTest.GetComponent<SpriteRenderer>().bounds.size.y / 2);
