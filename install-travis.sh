@@ -12,13 +12,13 @@
 
 ##
 # This repository uses the following $UNITY_HASH and $UNITY_VERSION.
-# http://download.unity3d.com/download_unity/01f4c123905a/MacEditorInstaller/Unity-5.4.3f1.pkg
+# http://netstorage.unity3d.com/unity/88d00a7498cd/MacEditorInstaller/Unity-5.5.1f1.pkg
 #
-# $UNITY_HASH = 01f4c123905a
-# $UNITY_VERSION = 5.4.3f1
+# $UNITY_HASH = 88d00a7498cd
+# $UNITY_VERSION = 5.5.1f1
 #
 # Additional package requirement
-# Check http://netstorage.unity3d.com/unity/01f4c123905a/unity-5.4.3f1-osx.ini for more packages.
+# Check http://netstorage.unity3d.com/unity/88d00a7498cd/unity-5.5.1f1-osx.ini for more packages.
 #   - UnityEditor WebGL Build support
 #   - UnityEditor Windows Build support
 #   - UnityEditor OSX Build support
@@ -38,8 +38,8 @@ install_extras() {
 if `test -z $UNITY_VERSION` || `test -z $UNITY_HASH` ; then
     echo "Either UNITY_VERSION or UNITY_HASH environment variable is not set. Have you exported those variables?"
     echo "Continue building with a default Unity version."
-    UNITY_HASH="01f4c123905a"
-    UNITY_VERSION="5.4.3f1"
+    UNITY_HASH="88d00a7498cd"
+    UNITY_VERSION="5.5.1f1"
     echo "The default Unity version is selected. Attempting to build using Unity version $UNITY_VERSION..."
     echo
     echo

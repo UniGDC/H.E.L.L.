@@ -31,3 +31,6 @@ sysinfo.txt
 
 # Suppression Files
 GlobalSuppressions.cs
+
+# Cloud9 stuff
+/.c9/

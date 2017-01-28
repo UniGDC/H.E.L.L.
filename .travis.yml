@@ -6,6 +6,8 @@ rvm:
  
 before_install:
  - "sudo chmod +x ./install-travis.sh"
+ - "export UNITY_VERSION=5.5.1f1"
+ - "export UNITY_HASH=88d00a7498cd"
 install:
  - ./install-travis.sh
 
