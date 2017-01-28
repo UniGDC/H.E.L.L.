@@ -1,0 +1,15 @@
+language: objective-c
+osx_image: xcode8.2
+
+rvm:
+ - 2.2
+ 
+before_install:
+ - "sudo chmod +x ./install-travis.sh"
+install:
+ - ./install-travis.sh
+
+before_script:
+ - "sudo chmod +x ./build-travis.sh"
+script:
+ - ./build-travis.sh
