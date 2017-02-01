@@ -46,6 +46,8 @@ public class FinalController : MonoBehaviour
     /// </summary>
     public float TargetYPosOffset = 1F;
 
+    public GameObject FinalBeamPrefab;
+
     private bool _inPosition = false;
 
     // Use this for initialization
@@ -87,7 +89,6 @@ public class FinalController : MonoBehaviour
 
     void HomeworkVolley()
     {
-        print("Homework Volley");
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
 
         for (int i = 0; i < HomeworkVolleySize; i++)
@@ -102,6 +103,17 @@ public class FinalController : MonoBehaviour
             finalHomework.GetComponent<FinalHWController>().Waypoint = waypoint;
             finalHomework.GetComponent<FinalHWController>().Target = target;
         }
+    }
+
+    void BeamAttack()
+    {
+        float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
+
+        GameObject finalBeam = Instantiate(FinalBeamPrefab);
+
+        finalBeam.GetComponent<FinalBeamController>().Player = Player;
+        finalBeam.transform.position = new Vector3(
+            Random.Range(-halfWidth + finalBeam.transform.lossyScale.x / 2, halfWidth - finalBeam.transform.lossyScale.x / 2), 0, 0);
     }
 
     void EndFinal()
