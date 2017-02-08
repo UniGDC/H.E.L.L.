@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class LauncherScript : MonoBehaviour
 {
@@ -7,9 +8,18 @@ public class LauncherScript : MonoBehaviour
     public GameObject HomeworkPrefab;
     public GameObject TestPrefab;
     public GameObject FinalPrefab;
+
+    public GameObject ClickCounter;
     public GameObject Player;
 
     public int LevelIndex;
+    /// <summary>
+    /// The number of times user must click to start the game
+    /// </summary>
+    public int NumClicks = 10000000;
+
+    private int _currentClicks;
+    private bool _clickGoalReached;
 
     public float HomeworkInterval = 4F;
     public float TestInterval = 10F;
@@ -18,11 +28,13 @@ public class LauncherScript : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        _currentClicks = 0;
+        _clickGoalReached = false;
+
         switch (LevelIndex)
         {
             case 0:
             {
-                InvokeRepeating("LaunchSimpleHomework", HomeworkInterval, HomeworkInterval);
                 break;
             }
             default:
@@ -38,6 +50,26 @@ public class LauncherScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+    }
+
+    public void OnClick()
+    {
+        if (!_clickGoalReached)
+        {
+            _currentClicks++;
+            ClickCounter.GetComponent<Text>().text = "Current clicks: " + _currentClicks + "/" + NumClicks;
+            if (_currentClicks >= NumClicks)
+            {
+                _clickGoalReached = true;
+                ClickCounter.GetComponent<Text>().text = "Done!";
+                InvokeRepeating("LaunchSimpleHomework", HomeworkInterval, HomeworkInterval);
+            }
+        }
+    }
+
+    void UpdateUI()
+    {
+
     }
 
     void LaunchSimpleHomework()
