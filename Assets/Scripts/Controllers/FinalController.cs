@@ -23,7 +23,7 @@ public class FinalController : MonoBehaviour
     /// <summary>
     /// THe interval between the final launching stuff
     /// </summary>
-    public float LaunchInterval = 15F;
+    public float LaunchInterval = 5F;
 
     public GameObject Player;
 

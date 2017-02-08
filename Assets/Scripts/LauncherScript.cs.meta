@@ -1,10 +1,19 @@
 fileFormatVersion: 2
 guid: 0a37294ce00a9524b89ccb13e9cd6d63
-timeCreated: 1481865908
+timeCreated: 1486530230
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - SimpleHomeworkPrefab: {fileID: 1000012194541660, guid: e5bd58f42183bf5478c890334d9bc6b3,
+      type: 2}
+  - HomeworkPrefab: {fileID: 1000011316530952, guid: 7475cbfc8cc4fc54aa7b958a131e3e43,
+      type: 2}
+  - TestPrefab: {fileID: 1000011316530952, guid: 7475cbfc8cc4fc54aa7b958a131e3e43,
+      type: 2}
+  - FinalPrefab: {fileID: 1000011512662058, guid: 9e043cde8ff7f294db4287bfac3ca08f,
+      type: 2}
+  - Player: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
