@@ -14,7 +14,7 @@ public class TestController : MonoBehaviour
     /// <summary>
     /// The force strength to apply to the test when chasing the player.
     /// </summary>
-    public float HorizontalForce = 0.5F;
+    public float HomingStrength = 0.5F;
 
     public float VerticalSpeed = 1;
 
@@ -30,11 +30,11 @@ public class TestController : MonoBehaviour
 
         if (differenceX > 0)
         {
-            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(HorizontalForce, 0));
+            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(HomingStrength, 0));
         }
         else if (differenceX < 0)
         {
-            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(-HorizontalForce, 0));
+            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(-HomingStrength, 0));
         }
     }
 
@@ -44,6 +44,6 @@ public class TestController : MonoBehaviour
         // Clamp horizontal speed
         Vector2 velocity = gameObject.GetComponent<Rigidbody2D>().velocity;
         gameObject.GetComponent<Rigidbody2D>().velocity =
-            new Vector2(Mathf.Clamp(velocity.x, -HorizontalSpeedCap, HorizontalSpeedCap), velocity.y);
+            new Vector2(Mathf.Clamp(velocity.x, -HorizontalSpeedCap, HorizontalSpeedCap), -VerticalSpeed);
     }
 }
