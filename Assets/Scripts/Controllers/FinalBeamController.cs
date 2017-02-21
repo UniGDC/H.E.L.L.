@@ -108,7 +108,7 @@ public class FinalBeamController : MonoBehaviour
 
     void DeductPlayerGrade()
     {
-        Player.GetComponent<PlayerGrade>().ChangeGrade(-1);
-        print(Player.GetComponent<PlayerGrade>().Grade);
+//        Player.GetComponent<PlayerGrade>().ChangeGrade(-1);
+//        print(Player.GetComponent<PlayerGrade>().Grade);
     }
 }

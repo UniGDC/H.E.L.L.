@@ -21,7 +21,7 @@ public class LauncherScript : MonoBehaviour
     private int _currentClicks;
     private bool _clickGoalReached;
 
-    public float InfinityPointYCoordinate = 7.5F; // I thought there is a special name for this point, can't remember.
+    public float VanishingPointYCoordinate = 7.5F;
     public float HomeworkSpeed = 1F;
     public float HomeworkInterval = 4F;
     public float TestInterval = 10F;
@@ -54,20 +54,20 @@ public class LauncherScript : MonoBehaviour
     {
     }
 
-    public void OnClick()
-    {
-        if (!_clickGoalReached)
-        {
-            _currentClicks++;
-            ClickCounter.GetComponent<Text>().text = "Current clicks: " + _currentClicks + "/" + NumClicks;
-            if (_currentClicks >= NumClicks)
-            {
-                _clickGoalReached = true;
-                ClickCounter.GetComponent<Text>().text = "Done!";
-                InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
-            }
-        }
-    }
+//    public void OnClick()
+//    {
+//        if (!_clickGoalReached)
+//        {
+//            _currentClicks++;
+//            ClickCounter.GetComponent<Text>().text = "Current clicks: " + _currentClicks + "/" + NumClicks;
+//            if (_currentClicks >= NumClicks)
+//            {
+//                _clickGoalReached = true;
+//                ClickCounter.GetComponent<Text>().text = "Done!";
+//                InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
+//            }
+//        }
+//    }
 
     void LaunchHomework()
     {
@@ -75,11 +75,11 @@ public class LauncherScript : MonoBehaviour
 
         // Assign position
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
-        newHomework.transform.position = new Vector2(0, InfinityPointYCoordinate);
+        newHomework.transform.position = new Vector2(0, VanishingPointYCoordinate);
 
         // Assign target
         float deltaX = Player.transform.position.x; // Swap this out for Random.Range(-halfWidth, halfWidth) if you want randomized targeting.
-        float deltaY = Player.transform.position.y - InfinityPointYCoordinate;
+        float deltaY = Player.transform.position.y - VanishingPointYCoordinate;
         Vector2 velocity = new Vector2(deltaX, deltaY).normalized;
         velocity.Scale(new Vector2(HomeworkSpeed, HomeworkSpeed));
         newHomework.GetComponent<Rigidbody2D>().velocity = velocity;
@@ -90,7 +90,7 @@ public class LauncherScript : MonoBehaviour
         GameObject newTest = Instantiate(TestPrefab);
 
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
-        newTest.transform.position = new Vector2(0, InfinityPointYCoordinate);
+        newTest.transform.position = new Vector2(0, VanishingPointYCoordinate);
 
         newTest.GetComponent<TestController>().Player = Player;
     }

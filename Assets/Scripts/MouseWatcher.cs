@@ -15,11 +15,11 @@ public class MouseWatcher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        bool mouseDown = Input.GetButtonDown("Fire1");
-        if (!_wasMouseDown && mouseDown)
-        {
-            gameObject.GetComponent<LauncherScript>().OnClick();
-        }
-        _wasMouseDown = mouseDown;
+//        bool mouseDown = Input.GetButtonDown("Fire1");
+//        if (!_wasMouseDown && mouseDown)
+//        {
+//            gameObject.GetComponent<LauncherScript>().OnClick();
+//        }
+//        _wasMouseDown = mouseDown;
     }
 }
