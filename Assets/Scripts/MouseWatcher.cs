@@ -1,25 +1,19 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Events;
 
 public class MouseWatcher : MonoBehaviour
 {
-    private Boolean _wasMouseDown;
+    private bool _wasLMBDown = false;
+    // ReSharper disable once InconsistentNaming
+    public UnityEvent LMBListener;
 
-    // Use this for initialization
-    void Start()
+    private void Update()
     {
-        _wasMouseDown = false;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-//        bool mouseDown = Input.GetButtonDown("Fire1");
-//        if (!_wasMouseDown && mouseDown)
-//        {
-//            gameObject.GetComponent<LauncherScript>().OnClick();
-//        }
-//        _wasMouseDown = mouseDown;
+        if (Input.GetMouseButtonDown(0) && !_wasLMBDown)
+        {
+            LMBListener.Invoke();
+        }
     }
 }
