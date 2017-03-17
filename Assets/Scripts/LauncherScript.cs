@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class LauncherScript : MonoBehaviour
@@ -13,61 +15,36 @@ public class LauncherScript : MonoBehaviour
 
     public int LevelIndex;
 
-    /// <summary>
-    /// The number of times user must click to start the game
-    /// </summary>
-    public int NumClicks = 10000000;
-
     private int _currentClicks;
     private bool _clickGoalReached;
 
-    public float VanishingPointYCoordinate = 7.5F;
+    public static readonly float VanishingPointYCoordinate = 7.5F;
     public float HomeworkSpeed = 1F;
     public float HomeworkInterval = 4F;
     public float TestInterval = 10F;
-    public float FinalStartTime = 60F;
+    public float EndTime = 60F;
+    public bool SpawnFinal = true;
+
+    public UnityEvent OnStart;
+    public UnityEvent OnEnd;
 
     // Use this for initialization
     void Start()
     {
-        _currentClicks = 0;
-        _clickGoalReached = false;
-
-        switch (LevelIndex)
+        if (HomeworkInterval > 0)
         {
-            case 0:
-            {
-                break;
-            }
-            default:
-            {
-                InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
-                InvokeRepeating("LaunchTest", TestInterval, TestInterval);
-                Invoke("StartFinal", FinalStartTime);
-                break;
-            }
+            InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
         }
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
+        if (TestInterval > 0)
+        {
+            InvokeRepeating("LaunchTest", TestInterval, TestInterval);
+        }
 
-//    public void OnClick()
-//    {
-//        if (!_clickGoalReached)
-//        {
-//            _currentClicks++;
-//            ClickCounter.GetComponent<Text>().text = "Current clicks: " + _currentClicks + "/" + NumClicks;
-//            if (_currentClicks >= NumClicks)
-//            {
-//                _clickGoalReached = true;
-//                ClickCounter.GetComponent<Text>().text = "Done!";
-//                InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
-//            }
-//        }
-//    }
+        Invoke("EndLevel", EndTime);
+
+        OnStart.Invoke();
+    }
 
     void LaunchHomework()
     {
@@ -95,16 +72,24 @@ public class LauncherScript : MonoBehaviour
         newTest.GetComponent<TestController>().Player = Player;
     }
 
-    void StartFinal()
+    void EndLevel()
     {
         // Cancel all homework and test launching
         CancelInvoke();
 
-        GameObject finalTest = Instantiate(FinalPrefab);
+        if (SpawnFinal)
+        {
+            GameObject finalTest = Instantiate(FinalPrefab);
 
-        finalTest.GetComponent<FinalController>().Player = Player;
+            finalTest.transform.position = new Vector2(0,
+                Camera.main.orthographicSize + finalTest.GetComponent<SpriteRenderer>().bounds.size.y / 2);
 
-        finalTest.transform.position = new Vector2(0,
-            Camera.main.orthographicSize + finalTest.GetComponent<SpriteRenderer>().bounds.size.y / 2);
+            FinalController controller = finalTest.GetComponent<FinalController>();
+            controller.OnEnd = delegate { OnEnd.Invoke(); };
+        }
+        else
+        {
+            OnEnd.Invoke();
+        }
     }
 }

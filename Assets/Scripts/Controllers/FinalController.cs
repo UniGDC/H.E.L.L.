@@ -50,6 +50,10 @@ public class FinalController : MonoBehaviour
 
     private bool _inPosition = false;
 
+    internal delegate void Callback();
+
+    internal Callback OnEnd;
+
     // Use this for initialization
     void Start()
     {
@@ -118,5 +122,7 @@ public class FinalController : MonoBehaviour
 
     void EndFinal()
     {
+        gameObject.SetActive(false);
+        OnEnd.Invoke();
     }
 }
