@@ -4,8 +4,6 @@ using System.Collections;
 
 public class TestController : MonoBehaviour
 {
-    public GameObject Player;
-
     /// <summary>
     /// The maximum speed at which the test will move horizontally.
     /// </summary>
@@ -26,7 +24,7 @@ public class TestController : MonoBehaviour
 
     void FixedUpdate()
     {
-        float differenceX = Player.transform.position.x - gameObject.transform.position.x;
+        float differenceX = PlayerController.Controller.gameObject.transform.position.x - gameObject.transform.position.x;
 
         if (differenceX > 0)
         {

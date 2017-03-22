@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
-public class Dialogue : AbstractStoryElement
+public class Dialogue : AbstractGameplayStage
 {
     public Image CharacterPortrait;
     public Text Content;
@@ -13,15 +13,17 @@ public class Dialogue : AbstractStoryElement
     private int _currentIndex = 0;
     private bool _printingFinished;
 
-    private void Start()
+    protected override void Awake()
     {
+        base.Awake();
         // For future reference: may read from files here.
         _text = Content.text;
         Content.text = "";
     }
 
-    public override void OnActivate()
+    public override void Begin()
     {
+        base.Begin();
         CharacterPortrait.enabled = true;
         Content.enabled = true;
         StartPrint();
@@ -54,21 +56,27 @@ public class Dialogue : AbstractStoryElement
         _currentIndex = _text.Length;
     }
 
-    public override void OnClick()
+    public void OnClick()
     {
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
+
         if (!_printingFinished)
         {
             JumpToFinish();
         }
         else
         {
-            OnFinished();
+            End();
         }
     }
 
-    public override void OnDeactivate()
+    public override void End()
     {
         CharacterPortrait.enabled = false;
         Content.enabled = false;
+        base.End();
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using JetBrains.Annotations;
 using UnityEngine.Events;
 
 public class MouseWatcher : MonoBehaviour
 {
+    // ReSharper disable once InconsistentNaming
     private bool _wasLMBDown = false;
     // ReSharper disable once InconsistentNaming
     public UnityEvent LMBListener;
@@ -15,5 +17,6 @@ public class MouseWatcher : MonoBehaviour
         {
             LMBListener.Invoke();
         }
+        _wasLMBDown = Input.GetMouseButtonDown(0);
     }
 }
