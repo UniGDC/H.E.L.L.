@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class LauncherScript : MonoBehaviour
+public class CombatStage : AbstractGameplayStage
 {
     public GameObject HomeworkPrefab;
     public GameObject TestPrefab;
@@ -25,12 +25,11 @@ public class LauncherScript : MonoBehaviour
     public float EndTime = 60F;
     public bool SpawnFinal = true;
 
-    public UnityEvent OnStart;
-    public UnityEvent OnEnd;
-
     // Use this for initialization
-    void Start()
+    public override void Begin()
     {
+        base.Begin();
+
         if (HomeworkInterval > 0)
         {
             InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
@@ -42,8 +41,6 @@ public class LauncherScript : MonoBehaviour
         }
 
         Invoke("EndLevel", EndTime);
-
-        OnStart.Invoke();
     }
 
     void LaunchHomework()
@@ -68,8 +65,6 @@ public class LauncherScript : MonoBehaviour
 
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
         newTest.transform.position = new Vector2(0, VanishingPointYCoordinate);
-
-        newTest.GetComponent<TestController>().Player = Player;
     }
 
     void EndLevel()
@@ -79,17 +74,17 @@ public class LauncherScript : MonoBehaviour
 
         if (SpawnFinal)
         {
-            GameObject finalTest = Instantiate(FinalPrefab);
+            GameObject finalExam = Instantiate(FinalPrefab);
 
-            finalTest.transform.position = new Vector2(0,
-                Camera.main.orthographicSize + finalTest.GetComponent<SpriteRenderer>().bounds.size.y / 2);
+            finalExam.transform.position = new Vector2(0,
+                Camera.main.orthographicSize + finalExam.GetComponent<SpriteRenderer>().bounds.size.y / 2);
 
-            FinalController controller = finalTest.GetComponent<FinalController>();
-            controller.OnEnd = delegate { OnEnd.Invoke(); };
+            FinalController controller = finalExam.GetComponent<FinalController>();
+            controller.OnEnd = delegate { End(); };
         }
         else
         {
-            OnEnd.Invoke();
+            End();
         }
     }
 }
