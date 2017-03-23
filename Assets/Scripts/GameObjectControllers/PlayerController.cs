@@ -2,18 +2,18 @@
 
 public class PlayerController : MonoBehaviour
 {
-    public static PlayerController Controller;
+    public static GameObject Player;
 
     public float Speed;
     private Rigidbody2D _thisBody;
 
     private void Awake()
     {
-        if (Controller == null)
+        if (Player == null)
         {
-            Controller = this;
+            Player = gameObject;
         }
-        else if (Controller != this)
+        else if (Player != gameObject)
         {
             Destroy(gameObject);
         }
@@ -32,9 +32,9 @@ public class PlayerController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (Controller == this)
+        if (Player == gameObject)
         {
-            Controller = null;
+            Player = null;
         }
     }
 }

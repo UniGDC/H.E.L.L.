@@ -19,9 +19,14 @@ public class CombatStage : AbstractGameplayStage
     private bool _clickGoalReached;
 
     public static readonly float VanishingPointYCoordinate = 7.5F;
-    public float HomeworkSpeed = 1F;
+
+    public float HomeworkSpeedModifier;
     public float HomeworkInterval = 4F;
+    public int HomeworkLaneCount = 7;
+    public int HomeworkPackSize = 2;
+
     public float TestInterval = 10F;
+
     public float EndTime = 60F;
     public bool SpawnFinal = true;
 
@@ -45,18 +50,24 @@ public class CombatStage : AbstractGameplayStage
 
     void LaunchHomework()
     {
-        GameObject newHomework = Instantiate(HomeworkPrefab);
-
-        // Assign position
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
-        newHomework.transform.position = new Vector2(0, VanishingPointYCoordinate);
+
+        float targetY = PlayerController.Player.transform.position.y;
+        float startY = Camera.main.orthographicSize + HomeworkPrefab.GetComponent<SpriteRenderer>().bounds.size.y / 2;
 
         // Assign target
-        float deltaX = Player.transform.position.x; // Swap this out for Random.Range(-halfWidth, halfWidth) if you want randomized targeting.
-        float deltaY = Player.transform.position.y - VanishingPointYCoordinate;
-        Vector2 velocity = new Vector2(deltaX, deltaY).normalized;
-        velocity.Scale(new Vector2(HomeworkSpeed, HomeworkSpeed));
-        newHomework.GetComponent<Rigidbody2D>().velocity = velocity;
+        int[] targetIndices = MathFuncs.RandomDistictArray(HomeworkPackSize, 0, HomeworkLaneCount);
+        foreach (int index in targetIndices)
+        {
+            float targetX = -halfWidth + halfWidth * (2 * index + 1) / HomeworkLaneCount;
+            float startX = targetX / (VanishingPointYCoordinate - targetY) * (VanishingPointYCoordinate - startY);
+
+            GameObject newHomework = Instantiate(HomeworkPrefab);
+
+            newHomework.transform.position = new Vector3(startX, startY);
+            newHomework.GetComponent<HomeworkController>().Target = new Vector3(targetX, targetY);
+            newHomework.GetComponent<HomeworkController>().SpeedModifier = HomeworkSpeedModifier;
+        }
     }
 
     void LaunchTest()

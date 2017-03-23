@@ -24,7 +24,7 @@ public class TestController : MonoBehaviour
 
     void FixedUpdate()
     {
-        float differenceX = PlayerController.Controller.gameObject.transform.position.x - gameObject.transform.position.x;
+        float differenceX = PlayerController.Player.transform.position.x - gameObject.transform.position.x;
 
         if (differenceX > 0)
         {

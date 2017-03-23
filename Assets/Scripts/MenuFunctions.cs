@@ -10,16 +10,6 @@ public class MenuFunctions : MonoBehaviour
 {
     public Button[] LoadSaveButtons;
 
-    // Use this for initialization
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
     public void LoadGameSaves(Button ToHide)
     {
         for (int i = 0; i < LoadSaveButtons.Length; i++)
