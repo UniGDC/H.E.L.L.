@@ -28,6 +28,7 @@ public class CombatStage : AbstractGameplayStage
     public float TestHorizontalSpeedModifier;
     public float TestVerticalSpeedModifier;
     public float TestTrackingStrength;
+    public float TestDisableTrackingY;
     public float TestInterval = 10F;
 
     // End conditions. The combat stage will end if any one of these set conditions is met.
@@ -87,10 +88,7 @@ public class CombatStage : AbstractGameplayStage
             newHomework.GetComponent<HomeworkController>().SpeedModifier = HomeworkSpeedModifier;
         }
 
-        if (_checkEnd())
-        {
-            _finishStage();
-        }
+        _checkEnd();
     }
 
     private void LaunchTest()
@@ -112,17 +110,18 @@ public class CombatStage : AbstractGameplayStage
         controller.HorizontalSpeed = TestHorizontalSpeedModifier;
         controller.VerticalSpeed = TestVerticalSpeedModifier;
         controller.TrackingStrength = TestTrackingStrength;
+        controller.DisableTrack = TestDisableTrackingY;
 
-        if (_checkEnd())
+        _checkEnd();
+    }
+
+    private void _checkEnd()
+    {
+        if (TimeLimit > 0 && Time.time - _startTime >= TimeLimit || HomeworkLimit > 0 && _homeworkCount >= HomeworkLimit ||
+            TestLimit > 0 && _testCount >= TestLimit)
         {
             _finishStage();
         }
-    }
-
-    private bool _checkEnd()
-    {
-        return TimeLimit > 0 && Time.time - _startTime >= TimeLimit || HomeworkLimit > 0 && _homeworkCount >= HomeworkLimit ||
-               TestLimit > 0 && _testCount >= TestLimit;
     }
 
     private void _finishStage()
