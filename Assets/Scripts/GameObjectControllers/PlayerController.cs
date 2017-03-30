@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _thisBody.velocity = new Vector2(Input.GetAxis("Horizontal") * Speed, 0);
+        _thisBody.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * Speed, 0);
     }
 
     private void OnDestroy()

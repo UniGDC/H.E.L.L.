@@ -36,13 +36,13 @@ public class MenuFunctions : MonoBehaviour
 
     public void NewGame(int saveSlot)
     {
-        GameState.State.SaveSlot = saveSlot;
-        GameState.State.Save();
+//        GameState.State.SaveSlot = saveSlot;
+//        GameState.State.Save();
     }
 
     public void LoadGame(int saveSlot)
     {
-        GameState.State.Load(saveSlot);
+//        GameState.State.Load(saveSlot);
     }
 
     public void TogglePause(Text buttonText)

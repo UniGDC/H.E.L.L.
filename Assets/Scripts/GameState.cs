@@ -10,19 +10,11 @@ public class GameState : MonoBehaviour
     [Serializable]
     public class PlayerData
     {
+        public int Level;
         public int Difficulty;
     }
 
-    public static GameState State = null;
-
-    private int _saveSlot;
-
-    public int SaveSlot
-    {
-        get { return _saveSlot; }
-
-        set { _saveSlot = value; }
-    }
+    public static GameState State;
 
     public PlayerData Data = new PlayerData();
 
@@ -45,18 +37,18 @@ public class GameState : MonoBehaviour
     public void Save()
     {
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream fs = File.Open(Application.persistentDataPath + "/save" + (_saveSlot + 1) + ".dat", FileMode.OpenOrCreate);
+        FileStream fs = File.Open(Application.persistentDataPath + "/save.dat", FileMode.OpenOrCreate);
 
         bf.Serialize(fs,Data);
         fs.Close();
     }
 
-    public void Load(int saveSlot)
+    public void Load()
     {
-        if (File.Exists(Application.persistentDataPath + "/save" + (saveSlot + 1) + ".dat"))
+        if (File.Exists(Application.persistentDataPath + "/save.dat"))
         {
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream fs = File.Open(Application.persistentDataPath + "/save" + (saveSlot + 1) + ".dat", FileMode.Open);
+            FileStream fs = File.Open(Application.persistentDataPath + "/save.dat", FileMode.Open);
 
             Data = (PlayerData) bf.Deserialize(fs);
             fs.Close();
