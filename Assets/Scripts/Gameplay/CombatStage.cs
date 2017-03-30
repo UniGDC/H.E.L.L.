@@ -30,8 +30,18 @@ public class CombatStage : AbstractGameplayStage
     public float TestTrackingStrength;
     public float TestInterval = 10F;
 
-    public float EndTime = 60F;
-    public bool SpawnFinal = true;
+    // End conditions. The combat stage will end if any one of these set conditions is met.
+    public float TimeLimit;
+
+    private float _startTime;
+    public int HomeworkLimit;
+    private int _homeworkCount;
+    public int TestLimit;
+    private int _testCount;
+
+    public bool EndImmediately = false;
+    public float EndDelay;
+    private bool _ending;
 
     // Use this for initialization
     public override void Begin()
@@ -42,17 +52,22 @@ public class CombatStage : AbstractGameplayStage
         {
             InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
         }
-
         if (TestInterval > 0)
         {
             InvokeRepeating("LaunchTest", TestInterval, TestInterval);
         }
 
-        Invoke("EndLevel", EndTime);
+        _startTime = Time.time;
+        _homeworkCount = 0;
+        _testCount = 0;
+
+        _ending = false;
     }
 
     private void LaunchHomework()
     {
+        _homeworkCount++;
+
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
 
         float targetY = PlayerController.Player.transform.position.y;
@@ -67,16 +82,24 @@ public class CombatStage : AbstractGameplayStage
             GameObject newHomework = Instantiate(HomeworkPrefab);
 
             newHomework.transform.position = new Vector3(startX, startY);
+            newHomework.GetComponent<HomeworkController>().Parent = this;
             newHomework.GetComponent<HomeworkController>().Target = new Vector3(targetX, targetY);
             newHomework.GetComponent<HomeworkController>().SpeedModifier = HomeworkSpeedModifier;
+        }
+
+        if (_checkEnd())
+        {
+            _finishStage();
         }
     }
 
     private void LaunchTest()
     {
+        _testCount++;
+
         GameObject newTest = Instantiate(TestPrefab);
 
-        // Assign starting position
+        // Assign starting screenPosition
         float targetY = PlayerController.Player.transform.position.y;
         float startY = Camera.main.orthographicSize + TestPrefab.GetComponent<SpriteRenderer>().bounds.size.y / 2;
         float targetX = PlayerController.Player.transform.position.x;
@@ -85,41 +108,59 @@ public class CombatStage : AbstractGameplayStage
         newTest.transform.position = new Vector2(startX, startY);
 
         TestController controller = newTest.GetComponent<TestController>();
+        controller.Parent = this;
         controller.HorizontalSpeed = TestHorizontalSpeedModifier;
         controller.VerticalSpeed = TestVerticalSpeedModifier;
         controller.TrackingStrength = TestTrackingStrength;
+
+        if (_checkEnd())
+        {
+            _finishStage();
+        }
     }
 
-    private void EndLevel()
+    private bool _checkEnd()
     {
-        // Cancel all homework and test launching
+        return TimeLimit > 0 && Time.time - _startTime >= TimeLimit || HomeworkLimit > 0 && _homeworkCount >= HomeworkLimit ||
+               TestLimit > 0 && _testCount >= TestLimit;
+    }
+
+    private void _finishStage()
+    {
         CancelInvoke();
-
-        if (SpawnFinal)
+        if (EndImmediately)
         {
-            GameObject finalExam = Instantiate(FinalPrefab);
-
-            finalExam.transform.position = new Vector2(0,
-                Camera.main.orthographicSize + finalExam.GetComponent<SpriteRenderer>().bounds.size.y / 2);
-
-            FinalController controller = finalExam.GetComponent<FinalController>();
-            controller.OnEnd = delegate { End(); };
+            Invoke("End", EndDelay);
         }
         else
         {
-            End();
+            _ending = true;
         }
+    }
+
+    public void OnAssignmentDestroyed()
+    {
+        if (_ending && GameObject.FindWithTag("Assignment") == null)
+        {
+            // No more assignments on screen, end.
+            Invoke("End", EndDelay);
+        }
+    }
+
+    public override void End()
+    {
+        base.End();
     }
 
     /// <summary>
     /// Constructs a 4x4 matrix to transform a vector on the floor to a vector in the pseudo-3D 2D game.
     /// </summary>
-    /// <param name="position"></param>
+    /// <param name="screenPosition"></param>
     /// <returns></returns>
-    public static Matrix4x4 GetPerspectiveTransformationMatrix(Vector2 position)
+    public static Matrix4x4 GetPerspectiveTransformationMatrix(Vector2 screenPosition)
     {
         // Only work with 2D
-        Vector2 toVanishingPoint = new Vector2(-position.x, VanishingPoint.y - position.y);
+        Vector2 toVanishingPoint = new Vector2(-screenPosition.x, VanishingPoint.y - screenPosition.y);
         float scale = toVanishingPoint.y / VanishingPoint.y;
         toVanishingPoint.Scale(new Vector2(1 / VanishingPoint.y, 1 / VanishingPoint.y));
 

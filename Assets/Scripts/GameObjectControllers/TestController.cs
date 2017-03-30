@@ -1,8 +1,9 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Security.Cryptography;
 
-public class TestController : MonoBehaviour
+public class TestController : AbstractAssignmentController
 {
     /// <summary>
     /// The maximum speed at which the test will move horizontally.
@@ -41,11 +42,7 @@ public class TestController : MonoBehaviour
                 .AddForce(CombatStage.GetPerspectiveTransformationMatrix(gameObject.transform.position)
                     .MultiplyVector(new Vector2(-TrackingStrength, 0)));
         }
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
         Matrix4x4 transformation = CombatStage.GetPerspectiveTransformationMatrix(gameObject.transform.position);
 
         // Revert perspective transformation of velocity
