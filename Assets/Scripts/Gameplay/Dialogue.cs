@@ -13,6 +13,8 @@ public class Dialogue : AbstractGameplayStage
     private int _currentIndex = 0;
     private bool _printingFinished;
 
+    public Text Continue;
+
     protected override void Awake()
     {
         base.Awake();
@@ -42,6 +44,8 @@ public class Dialogue : AbstractGameplayStage
         {
             Content.text = _text.Substring(0, _currentIndex);
             _printingFinished = true;
+            Continue.enabled = true;
+
             CancelInvoke("Advance");
             return;
         }
@@ -77,6 +81,7 @@ public class Dialogue : AbstractGameplayStage
     {
         CharacterPortrait.enabled = false;
         Content.enabled = false;
+        Continue.enabled = false;
         base.End();
     }
 }

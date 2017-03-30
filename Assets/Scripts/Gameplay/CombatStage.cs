@@ -10,26 +10,21 @@ public class CombatStage : AbstractGameplayStage
     public GameObject TestPrefab;
     public GameObject FinalPrefab;
 
-    public GameObject ClickCounter;
-    public GameObject Player;
-
-    public int LevelIndex;
-
     private int _currentClicks;
     private bool _clickGoalReached;
 
     public static readonly Vector2 VanishingPoint = new Vector2(0, 7.5F);
 
     public float HomeworkSpeedModifier;
-    public float HomeworkInterval = 4F;
+    public float HomeworkInterval;
     public int HomeworkLaneCount = 7;
-    public int HomeworkPackSize = 2;
+    public int HomeworkPackSize;
 
     public float TestHorizontalSpeedModifier;
     public float TestVerticalSpeedModifier;
     public float TestTrackingStrength;
     public float TestDisableTrackingY;
-    public float TestInterval = 10F;
+    public float TestInterval;
 
     // End conditions. The combat stage will end if any one of these set conditions is met.
     public float TimeLimit;
