@@ -66,7 +66,7 @@ public class CombatStage : AbstractGameplayStage
 
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
 
-        float targetY = PlayerController.Player.transform.position.y;
+        float targetY = PlayerController.Instance.gameObject.transform.position.y;
         float startY = Camera.main.orthographicSize + HomeworkPrefab.GetComponent<SpriteRenderer>().bounds.size.y / 2;
 
         // Assign target
@@ -93,9 +93,9 @@ public class CombatStage : AbstractGameplayStage
         GameObject newTest = Instantiate(TestPrefab);
 
         // Assign starting screenPosition
-        float targetY = PlayerController.Player.transform.position.y;
+        float targetY = PlayerController.Instance.gameObject.transform.position.y;
         float startY = Camera.main.orthographicSize + TestPrefab.GetComponent<SpriteRenderer>().bounds.size.y / 2;
-        float targetX = PlayerController.Player.transform.position.x;
+        float targetX = PlayerController.Instance.gameObject.transform.position.x;
         float startX = targetX / (VanishingPoint.y - targetY) * (VanishingPoint.y - startY);
 
         newTest.transform.position = new Vector2(startX, startY);

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SaveLoader : MonoBehaviour
+public class DebugHUD : MonoBehaviour
 {
 }
