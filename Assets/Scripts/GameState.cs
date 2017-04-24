@@ -10,7 +10,7 @@ public class GameState : SingletonMonoBehaviour<GameState>
     [Serializable]
     public class PlayerData
     {
-        public int Level; // TODO 0-indexed or 1-indexed?
+        public int Level; // 0-indexed.
         public int Difficulty; // TODO
         /// <summary>
         /// If true, when the player fails a level, the entire game is reset.

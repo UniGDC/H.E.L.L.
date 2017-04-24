@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine.SceneManagement;
 
-public class DataLoader : MonoBehaviour
+public class DataHandler : MonoBehaviour
 {
     public static readonly string SavePath = Application.persistentDataPath + "/save.dat";
 
