@@ -39,7 +39,7 @@ public class GameState : MonoBehaviour
         BinaryFormatter bf = new BinaryFormatter();
         FileStream fs = File.Open(Application.persistentDataPath + "/save.dat", FileMode.OpenOrCreate);
 
-        bf.Serialize(fs,Data);
+        bf.Serialize(fs, Data);
         fs.Close();
     }
 
