@@ -10,8 +10,6 @@ public class MainMenu : MonoBehaviour
     public GameObject LoadGameButton;
     public GameObject WarnSaveOverrideScreen;
 
-    public Scene[] LevelScenes;
-
     private void Start()
     {
         _checkSavedGame();
@@ -48,17 +46,7 @@ public class MainMenu : MonoBehaviour
         WarnSaveOverrideScreen.SetActive(true);
     }
 
-    private void _toLevelScene(int level)
-    {
-        SceneManager.LoadScene(LevelScenes[level].buildIndex);
-    }
-
-    private void _toCurrentLevelScene()
-    {
-        _toLevelScene(GameState.Instance.Data.Level);
-    }
-
-    public void Menu() // TODO come up with a better name
+    public void ToMenu()
     {
         _toMainScreen();
     }
@@ -77,7 +65,7 @@ public class MainMenu : MonoBehaviour
         else
         {
             _resetGameStateData();
-            _toCurrentLevelScene();
+            LevelManager.Instance.ToCurrentLevelScene();
         }
     }
 
@@ -90,6 +78,6 @@ public class MainMenu : MonoBehaviour
     public void LoadGame()
     {
         DataHandler.LoadData();
-        _toCurrentLevelScene();
+        LevelManager.Instance.ToCurrentLevelScene();
     }
 }
