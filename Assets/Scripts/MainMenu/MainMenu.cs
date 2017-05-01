@@ -29,7 +29,7 @@ public class MainMenu : MonoBehaviour
         WarnSaveOverrideScreen.SetActive(false);
     }
 
-    private void _toPlayScreen()
+    public void ToPlayScreen()
     {
         _checkSavedGame();
         PlayGameButton.SetActive(false);
@@ -38,7 +38,7 @@ public class MainMenu : MonoBehaviour
         WarnSaveOverrideScreen.SetActive(false);
     }
 
-    private void _toWarnSaveOverrideScreen()
+    public void ToWarnSaveOverrideScreen()
     {
         PlayGameButton.SetActive(false);
         NewGameButton.SetActive(false);
@@ -46,21 +46,11 @@ public class MainMenu : MonoBehaviour
         WarnSaveOverrideScreen.SetActive(true);
     }
 
-    public void ToMenu()
-    {
-        _toMainScreen();
-    }
-
-    public void PlayGame()
-    {
-        _toPlayScreen();
-    }
-
     public void NewGame(bool overrideSave)
     {
         if (!overrideSave && DataHandler.HasSaveFile())
         {
-            _toWarnSaveOverrideScreen();
+            ToWarnSaveOverrideScreen();
         }
         else
         {

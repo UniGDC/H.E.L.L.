@@ -28,7 +28,7 @@ public class SingletonMonoBehaviour<TInstanceClass> : MonoBehaviour
         }
     }
 
-    public bool Persistent = true;
+    public bool Persistent;
 
     private void OnDestroy()
     {

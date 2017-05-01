@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DebugConsole : MonoBehaviour
+public class DebugConsole : SingletonMonoBehaviour<DebugConsole>
 {
     public GameObject Console;
     public InputField Command;
@@ -16,8 +16,8 @@ public class DebugConsole : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
         Console.SetActive(false);
-        DontDestroyOnLoad(gameObject);
 
         _initCommandHandlers();
     }
@@ -34,6 +34,7 @@ public class DebugConsole : MonoBehaviour
             }
         };
         _commandHandlers["load"] = arguments => { LevelManager.Instance.ToLevelScene(int.Parse(arguments[0])); };
+        _commandHandlers["mainMenu"] = arguments => { LevelManager.Instance.ToMainMenu(); };
     }
 
     private void Update()
@@ -51,7 +52,6 @@ public class DebugConsole : MonoBehaviour
             return;
         }
 
-        print("Command!");
         string[] tokens = Command.text.Split(' ');
         Command.text = "";
 
