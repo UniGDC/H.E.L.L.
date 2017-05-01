@@ -58,6 +58,8 @@ public class CombatStage : AbstractGameplayStage
         _testCount = 0;
 
         _ending = false;
+
+        StartCoroutine(_checkEnd());
     }
 
     private void LaunchHomework()
@@ -82,8 +84,6 @@ public class CombatStage : AbstractGameplayStage
             newHomework.GetComponent<HomeworkController>().Target = new Vector3(targetX, targetY);
             newHomework.GetComponent<HomeworkController>().SpeedModifier = HomeworkSpeedModifier;
         }
-
-        _checkEnd();
     }
 
     private void LaunchTest()
@@ -106,16 +106,20 @@ public class CombatStage : AbstractGameplayStage
         controller.VerticalSpeed = TestVerticalSpeedModifier;
         controller.TrackingStrength = TestTrackingStrength;
         controller.DisableTrack = TestDisableTrackingY;
-
-        _checkEnd();
     }
 
-    private void _checkEnd()
+    private IEnumerator _checkEnd()
     {
-        if (TimeLimit > 0 && Time.time - _startTime >= TimeLimit || HomeworkLimit > 0 && _homeworkCount >= HomeworkLimit ||
-            TestLimit > 0 && _testCount >= TestLimit)
+        while (true)
         {
-            _finishStage();
+            if (TimeLimit > 0 && Time.time - _startTime >= TimeLimit || HomeworkLimit > 0 && _homeworkCount >= HomeworkLimit ||
+                TestLimit > 0 && _testCount >= TestLimit)
+            {
+                _finishStage();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(0.5F);
         }
     }
 
