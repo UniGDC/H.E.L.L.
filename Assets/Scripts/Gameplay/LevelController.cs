@@ -3,28 +3,18 @@ using UnityEngine;
 using System.Collections;
 
 
-public class LevelController : MonoBehaviour
+public class LevelController : SingletonMonoBehaviour<LevelController>, IStageController
 {
-    public static LevelController Controller;
-
     private int _currentIndex;
-    public AbstractGameplayStage[] Stages;
+    public AbstractStage[] Stages;
 
     private void Awake()
     {
-        if (Controller == null)
-        {
-            Controller = this;
-        }
-        else if (Controller != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        Instance = this;
 
         if (Stages == null || Stages.Length == 0)
         {
-            Stages = gameObject.GetComponentsInChildren<AbstractGameplayStage>();
+            Stages = gameObject.GetComponentsInChildren<AbstractStage>();
         }
         _currentIndex = 0;
     }
@@ -48,6 +38,7 @@ public class LevelController : MonoBehaviour
     {
         if (_currentIndex < Stages.Length)
         {
+            Stages[_currentIndex].ParentController = this;
             Stages[_currentIndex].Begin();
         }
         else
@@ -55,6 +46,12 @@ public class LevelController : MonoBehaviour
             // No point keeping this canvas anymore
             gameObject.SetActive(false);
         }
+    }
+
+    public void SkipToStage(int stageIndex)
+    {
+        _currentIndex = stageIndex;
+        StartNext();
     }
 
     public void Continue()
@@ -65,9 +62,9 @@ public class LevelController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (Controller == this)
+        if (Instance == this)
         {
-            Controller = null;
+            Instance = null;
         }
     }
 }

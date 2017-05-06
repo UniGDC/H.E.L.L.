@@ -8,7 +8,7 @@ public class GameplayController : MonoBehaviour
     public static GameplayController Controller;
 
     private int _currentIndex;
-    public AbstractGameplayStage[] Stages;
+    public AbstractStage[] Stages;
 
     private void Awake()
     {
@@ -24,7 +24,7 @@ public class GameplayController : MonoBehaviour
 
         if (Stages == null || Stages.Length == 0)
         {
-            Stages = gameObject.GetComponentsInChildren<AbstractGameplayStage>();
+            Stages = gameObject.GetComponentsInChildren<AbstractStage>();
         }
         _currentIndex = 0;
     }

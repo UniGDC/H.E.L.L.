@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class CombatStage : AbstractGameplayStage
+public class CombatStage : AbstractStage
 {
     public GameObject HomeworkPrefab;
     public GameObject TestPrefab;
@@ -28,7 +28,6 @@ public class CombatStage : AbstractGameplayStage
 
     // End conditions. The combat stage will end if any one of these set conditions is met.
     public float TimeLimit;
-
     private float _startTime;
     public int HomeworkLimit;
     private int _homeworkCount;

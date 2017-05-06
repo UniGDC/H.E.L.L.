@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
-public class Dialogue : AbstractGameplayStage
+public class Dialogue : AbstractStage
 {
     public Image CharacterPortrait;
     public Text Content;
