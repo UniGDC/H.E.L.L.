@@ -6,8 +6,6 @@ using RangHo.DialogueScript;
 
 public class Dialogue : AbstractGameplayStage
 {
-    
-
     public Image CharacterPortrait;
     public Text Content;
     
