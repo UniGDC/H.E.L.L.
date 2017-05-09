@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -10,32 +12,40 @@ public class CombatStage : AbstractStage
     public GameObject TestPrefab;
     public GameObject FinalPrefab;
 
-    private int _currentClicks;
-    private bool _clickGoalReached;
-
     public static readonly Vector2 VanishingPoint = new Vector2(0, 7.5F);
 
-    public float HomeworkSpeedModifier;
-    public float HomeworkInterval;
-    public int HomeworkLaneCount = 7;
-    public int HomeworkPackSize;
+    [Serializable]
+    public class HomeworkSpawnerConfig
+    {
+        public float Interval;
+        public int PackSize;
+        public int LaneCount = 7;
+        public float SpeedModifier;
+    }
 
-    public float TestHorizontalSpeedModifier;
-    public float TestVerticalSpeedModifier;
-    public float TestTrackingStrength;
-    public float TestDisableTrackingY;
-    public float TestInterval;
+    [Serializable]
+    public class TestSpawnerConfig
+    {
+        public float Interval;
+        public float HorizontalSpeedModifier;
+        public float VerticalSpeedModifier;
+        public float TrackingStrength;
+        public float DisableTrackingY;
+    }
 
-    // End conditions. The combat stage will end if any one of these set conditions is met.
-    public float TimeLimit;
+    private HomeworkSpawnerConfig _homeworkConfig;
+    private TestSpawnerConfig _testConfig;
 
-    private float _startTime;
-    public int HomeworkLimit;
-    private int _homeworkCount;
-    public int TestLimit;
-    private int _testCount;
+    [Serializable]
+    public class SpawnerConfig
+    {
+        public float Time;
+        public HomeworkSpawnerConfig HomeworkConfig;
+        public TestSpawnerConfig TestConfig;
+    }
 
-    public bool EndImmediately = false;
+    public SpawnerConfig[] Configs;
+
     public float EndDelay;
     private bool _ending;
 
@@ -44,50 +54,53 @@ public class CombatStage : AbstractStage
     {
         base.Begin();
 
-        if (HomeworkInterval > 0)
-        {
-//            InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
-            StartCoroutine(_homeworkCoroutine());
-        }
-        if (TestInterval > 0)
-        {
-//            InvokeRepeating("LaunchTest", TestInterval, TestInterval);
-            StartCoroutine(_testCoroutine());
-        }
+        // Start the config updating coroutine
+        StartCoroutine(_startUpdate());
 
-        _startTime = Time.time;
-        _homeworkCount = 0;
-        _testCount = 0;
-
-        _ending = false;
-
-        StartCoroutine(_checkEndTime());
+        // Start homework and test spawning coroutine
+        StartCoroutine(_homeworkCoroutine());
+        StartCoroutine(_testCoroutine());
     }
 
-    private IEnumerator _homeworkCoroutine()
+    private IEnumerator _startUpdate()
     {
-        while (HomeworkLimit == 0 || _homeworkCount < HomeworkLimit)
+        // Use a foreach to loop through all the configs one by one
+        foreach (SpawnerConfig config in Configs)
         {
-            yield return new WaitForSeconds(HomeworkInterval);
-            LaunchHomework();
+            _homeworkConfig = config.HomeworkConfig;
+            _testConfig = config.TestConfig;
+            // Wait for the given amount of time, and then continue with the loop to access the next config
+            yield return new WaitForSeconds(config.Time);
         }
         _finishStage();
     }
 
+    private IEnumerator _homeworkCoroutine()
+    {
+        while (!_ending)
+        {
+            // If period is negative, pause.
+            while (_testConfig == null || _homeworkConfig.Interval <= 0)
+            {
+                yield return null;
+            }
+            yield return new WaitForSeconds(_homeworkConfig.Interval);
+            LaunchHomework();
+        }
+    }
+
     private void LaunchHomework()
     {
-        _homeworkCount++;
-
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
 
         float targetY = PlayerController.Instance.gameObject.transform.position.y;
         float startY = Camera.main.orthographicSize + HomeworkPrefab.GetComponent<SpriteRenderer>().bounds.size.y / 2;
 
         // Assign target
-        int[] targetIndices = MathFuncs.RandomDistictArray(HomeworkPackSize, 0, HomeworkLaneCount);
+        int[] targetIndices = MathFuncs.RandomDistictArray(_homeworkConfig.PackSize, 0, _homeworkConfig.LaneCount);
         foreach (int index in targetIndices)
         {
-            float targetX = -halfWidth + halfWidth * (2 * index + 1) / HomeworkLaneCount;
+            float targetX = -halfWidth + halfWidth * (2 * index + 1) / _homeworkConfig.LaneCount;
             float startX = targetX / (VanishingPoint.y - targetY) * (VanishingPoint.y - startY);
             GameObject newHomework = Instantiate(HomeworkPrefab);
             newHomework.transform.parent = Spawned.Instance.gameObject.transform;
@@ -95,24 +108,26 @@ public class CombatStage : AbstractStage
             newHomework.transform.position = new Vector3(startX, startY);
             newHomework.GetComponent<HomeworkController>().Parent = this;
             newHomework.GetComponent<HomeworkController>().Target = new Vector3(targetX, targetY);
-            newHomework.GetComponent<HomeworkController>().SpeedModifier = HomeworkSpeedModifier;
+            newHomework.GetComponent<HomeworkController>().SpeedModifier = _homeworkConfig.SpeedModifier;
         }
     }
 
     private IEnumerator _testCoroutine()
     {
-        while (TestLimit == 0 || _testCount < TestLimit)
+        while (!_ending)
         {
-            yield return new WaitForSeconds(TestInterval);
+            // If period is negative, pause.
+            while (_testConfig == null || _testConfig.Interval <= 0)
+            {
+                yield return null;
+            }
+            yield return new WaitForSeconds(_testConfig.Interval);
             LaunchTest();
         }
-        _finishStage();
     }
 
     private void LaunchTest()
     {
-        _testCount++;
-
         GameObject newTest = Instantiate(TestPrefab);
         newTest.transform.parent = Spawned.Instance.gameObject.transform;
 
@@ -126,33 +141,17 @@ public class CombatStage : AbstractStage
 
         TestController controller = newTest.GetComponent<TestController>();
         controller.Parent = this;
-        controller.HorizontalSpeed = TestHorizontalSpeedModifier;
-        controller.VerticalSpeed = TestVerticalSpeedModifier;
-        controller.TrackingStrength = TestTrackingStrength;
-        controller.DisableTrack = TestDisableTrackingY;
-    }
-
-    private IEnumerator _checkEndTime()
-    {
-        while (TimeLimit <= 0 || Time.time - _startTime < TimeLimit)
-        {
-            yield return new WaitForSeconds(0.5F);
-        }
-        _finishStage();
+        controller.HorizontalSpeed = _testConfig.HorizontalSpeedModifier;
+        controller.VerticalSpeed = _testConfig.VerticalSpeedModifier;
+        controller.TrackingStrength = _testConfig.TrackingStrength;
+        controller.DisableTrack = _testConfig.DisableTrackingY;
     }
 
     private void _finishStage()
     {
         StopAllCoroutines();
-        if (EndImmediately)
-        {
-            Invoke("End", EndDelay);
-        }
-        else
-        {
-            _ending = true;
-            CheckEnd();
-        }
+        _ending = true;
+        CheckEnd();
     }
 
     public void CheckEnd()
