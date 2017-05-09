@@ -79,9 +79,13 @@ public class Dialogue : AbstractStage
 
     public override void End()
     {
-        CharacterPortrait.enabled = false;
-        Content.enabled = false;
-        Continue.enabled = false;
+//        CharacterPortrait.enabled = false;
+//        Content.enabled = false;
         base.End();
+    }
+
+    private void OnDisable()
+    {
+        Continue.enabled = false;
     }
 }

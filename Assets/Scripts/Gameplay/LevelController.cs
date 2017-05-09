@@ -50,6 +50,10 @@ public class LevelController : SingletonMonoBehaviour<LevelController>, IStageCo
 
     public void SkipToStage(int stageIndex)
     {
+        foreach (AbstractStage stage in Stages)
+        {
+            stage.gameObject.SetActive(false);
+        }
         _currentIndex = stageIndex;
         StartNext();
     }
@@ -58,13 +62,5 @@ public class LevelController : SingletonMonoBehaviour<LevelController>, IStageCo
     {
         EndCurrent();
         StartNext();
-    }
-
-    private void OnDestroy()
-    {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
     }
 }

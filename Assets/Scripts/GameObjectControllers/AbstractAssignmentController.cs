@@ -21,6 +21,6 @@ public class AbstractAssignmentController : MonoBehaviour
 
     private void OnDestroy()
     {
-        Parent.OnAssignmentDestroyed();
+        Parent.CheckEnd();
     }
 }

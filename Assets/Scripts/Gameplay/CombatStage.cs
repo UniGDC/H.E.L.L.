@@ -28,6 +28,7 @@ public class CombatStage : AbstractStage
 
     // End conditions. The combat stage will end if any one of these set conditions is met.
     public float TimeLimit;
+
     private float _startTime;
     public int HomeworkLimit;
     private int _homeworkCount;
@@ -45,11 +46,13 @@ public class CombatStage : AbstractStage
 
         if (HomeworkInterval > 0)
         {
-            InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
+//            InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
+            StartCoroutine(_homeworkCoroutine());
         }
         if (TestInterval > 0)
         {
-            InvokeRepeating("LaunchTest", TestInterval, TestInterval);
+//            InvokeRepeating("LaunchTest", TestInterval, TestInterval);
+            StartCoroutine(_testCoroutine());
         }
 
         _startTime = Time.time;
@@ -58,7 +61,17 @@ public class CombatStage : AbstractStage
 
         _ending = false;
 
-        StartCoroutine(_checkEnd());
+        StartCoroutine(_checkEndTime());
+    }
+
+    private IEnumerator _homeworkCoroutine()
+    {
+        while (HomeworkLimit == 0 || _homeworkCount < HomeworkLimit)
+        {
+            yield return new WaitForSeconds(HomeworkInterval);
+            LaunchHomework();
+        }
+        _finishStage();
     }
 
     private void LaunchHomework()
@@ -77,6 +90,7 @@ public class CombatStage : AbstractStage
             float targetX = -halfWidth + halfWidth * (2 * index + 1) / HomeworkLaneCount;
             float startX = targetX / (VanishingPoint.y - targetY) * (VanishingPoint.y - startY);
             GameObject newHomework = Instantiate(HomeworkPrefab);
+            newHomework.transform.parent = Spawned.Instance.gameObject.transform;
 
             newHomework.transform.position = new Vector3(startX, startY);
             newHomework.GetComponent<HomeworkController>().Parent = this;
@@ -85,11 +99,22 @@ public class CombatStage : AbstractStage
         }
     }
 
+    private IEnumerator _testCoroutine()
+    {
+        while (TestLimit == 0 || _testCount < TestLimit)
+        {
+            yield return new WaitForSeconds(TestInterval);
+            LaunchTest();
+        }
+        _finishStage();
+    }
+
     private void LaunchTest()
     {
         _testCount++;
 
         GameObject newTest = Instantiate(TestPrefab);
+        newTest.transform.parent = Spawned.Instance.gameObject.transform;
 
         // Assign starting screenPosition
         float targetY = PlayerController.Instance.gameObject.transform.position.y;
@@ -107,24 +132,18 @@ public class CombatStage : AbstractStage
         controller.DisableTrack = TestDisableTrackingY;
     }
 
-    private IEnumerator _checkEnd()
+    private IEnumerator _checkEndTime()
     {
-        while (true)
+        while (TimeLimit <= 0 || Time.time - _startTime < TimeLimit)
         {
-            if (TimeLimit > 0 && Time.time - _startTime >= TimeLimit || HomeworkLimit > 0 && _homeworkCount >= HomeworkLimit ||
-                TestLimit > 0 && _testCount >= TestLimit)
-            {
-                _finishStage();
-                yield break;
-            }
-
             yield return new WaitForSeconds(0.5F);
         }
+        _finishStage();
     }
 
     private void _finishStage()
     {
-        CancelInvoke();
+        StopAllCoroutines();
         if (EndImmediately)
         {
             Invoke("End", EndDelay);
@@ -132,10 +151,11 @@ public class CombatStage : AbstractStage
         else
         {
             _ending = true;
+            CheckEnd();
         }
     }
 
-    public void OnAssignmentDestroyed()
+    public void CheckEnd()
     {
         if (_ending && GameObject.FindWithTag("Assignment") == null)
         {

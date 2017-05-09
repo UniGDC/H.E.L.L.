@@ -3,11 +3,17 @@
 public class LevelManager : SingletonMonoBehaviour<LevelManager>
 {
     public string MainMenuLevelName;
+    public string SetupSceneName;
     public string[] LevelNames;
 
     private void Awake()
     {
         Instance = this;
+    }
+
+    public void ReloadScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void ToLevelScene(int level)
