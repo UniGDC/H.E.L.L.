@@ -25,7 +25,7 @@ public class PlayerHealthController : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.gameObject.tag.Equals("Assignment")) return;
-        Health -= 1;
+        Health -= other.gameObject.GetComponent<AbstractAssignmentController>().Damage;
         Destroy(other.gameObject);
     }
 
