@@ -43,7 +43,7 @@ public class GameplayController : MonoBehaviour
     {
         if (_currentIndex < Stages.Length)
         {
-            Stages[_currentIndex].Begin();
+            Stages[_currentIndex].Run();
         }
         else
         {

@@ -6,24 +6,13 @@ public abstract class AbstractStage : MonoBehaviour
 {
     public bool Running { get; private set; }
 
-    public IStageController ParentController;
-
     protected virtual void Awake()
     {
         Running = false;
         gameObject.SetActive(false);
     }
 
-    public virtual void Begin()
-    {
-        gameObject.SetActive(true);
-        Running = true;
-    }
+    public abstract IEnumerator Run();
 
-    public virtual void End()
-    {
-        Running = false;
-        gameObject.SetActive(false);
-        ParentController.Continue();
-    }
+    public abstract void Kill();
 }

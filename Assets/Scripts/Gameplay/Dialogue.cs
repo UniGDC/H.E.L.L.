@@ -10,7 +10,7 @@ public class Dialogue : AbstractStage
 
     public const float PrintRate = 0.02F;
     private String _text;
-    private int _currentIndex = 0;
+    private int _currentIndex;
     private bool _printingFinished;
 
     public Text Continue;
@@ -23,38 +23,46 @@ public class Dialogue : AbstractStage
         Content.text = "";
     }
 
-    public override void Begin()
+    public override IEnumerator Run()
     {
-        base.Begin();
+        _currentIndex = 0;
         CharacterPortrait.enabled = true;
         Content.enabled = true;
-        StartPrint();
+        yield return StartCoroutine(_print());
+        yield return new WaitUntil(() => Input.GetMouseButtonDown(0));
     }
 
-    private void StartPrint()
+    private IEnumerator _print()
     {
         _printingFinished = false;
-        InvokeRepeating("Advance", 0, PrintRate);
-    }
-
-    private void Advance()
-    {
-        // Check if finished printing
-        if (_currentIndex >= _text.Length)
+        for (; _currentIndex < _text.Length; _currentIndex++)
         {
             Content.text = _text.Substring(0, _currentIndex);
-            _printingFinished = true;
-            Continue.enabled = true;
-
-            CancelInvoke("Advance");
-            return;
+            yield return new WaitForSeconds(PrintRate);
         }
-
-        _currentIndex++;
-        Content.text = _text.Substring(0, _currentIndex);
+        _printingFinished = true;
+        Content.text = _text;
+        Continue.enabled = true;
     }
 
-    private void JumpToFinish()
+//    private void Advance()
+//    {
+//        // Check if finished printing
+//        if (_currentIndex >= _text.Length)
+//        {
+//            Content.text = _text.Substring(0, _currentIndex);
+//            _printingFinished = true;
+//            Continue.enabled = true;
+//
+//            CancelInvoke("Advance");
+//            return;
+//        }
+//
+//        _currentIndex++;
+//        Content.text = _text.Substring(0, _currentIndex);
+//    }
+
+    private void _jumpToFinish()
     {
         // Finish printing
         _currentIndex = _text.Length;
@@ -69,19 +77,17 @@ public class Dialogue : AbstractStage
 
         if (!_printingFinished)
         {
-            JumpToFinish();
-        }
-        else
-        {
-            End();
+            _jumpToFinish();
         }
     }
 
-    public override void End()
+    public override void Kill()
     {
-//        CharacterPortrait.enabled = false;
-//        Content.enabled = false;
-        base.End();
+        StopAllCoroutines();
+        Continue.enabled = false;
+        Content.enabled = false;
+        CharacterPortrait.enabled = false;
+        gameObject.SetActive(false);
     }
 
     private void OnDisable()

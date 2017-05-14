@@ -20,9 +20,4 @@ public class AbstractAssignmentController : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    private void OnDestroy()
-    {
-        Parent.CheckEnd();
-    }
 }

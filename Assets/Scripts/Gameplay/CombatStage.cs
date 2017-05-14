@@ -47,19 +47,25 @@ public class CombatStage : AbstractStage
     public SpawnerConfig[] Configs;
 
     public float EndDelay;
-    private bool _ending;
+
+    private Coroutine _homeworkSpawner;
+    private Coroutine _testSpawner;
+    private bool _spawning;
+    private bool _running;
 
     // Use this for initialization
-    public override void Begin()
+    public override IEnumerator Run()
     {
-        base.Begin();
-
+        _running = true;
+        _spawning = true;
         // Start the config updating coroutine
         StartCoroutine(_startUpdate());
 
         // Start homework and test spawning coroutine
-        StartCoroutine(_homeworkCoroutine());
-        StartCoroutine(_testCoroutine());
+        _homeworkSpawner = StartCoroutine(_homeworkCoroutine());
+        _testSpawner = StartCoroutine(_testCoroutine());
+
+        yield return new WaitWhile(() => _running);
     }
 
     private IEnumerator _startUpdate()
@@ -72,18 +78,16 @@ public class CombatStage : AbstractStage
             // Wait for the given amount of time, and then continue with the loop to access the next config
             yield return new WaitForSeconds(config.Time);
         }
-        _finishStage();
+        // TODO
+        StartCoroutine(_finishStage());
     }
 
     private IEnumerator _homeworkCoroutine()
     {
-        while (!_ending)
+        while (_spawning)
         {
             // If period is negative, pause.
-            while (_testConfig == null || _homeworkConfig.Interval <= 0)
-            {
-                yield return null;
-            }
+            yield return new WaitWhile(() => _homeworkConfig == null || _homeworkConfig.Interval <= 0);
             yield return new WaitForSeconds(_homeworkConfig.Interval);
             LaunchHomework();
         }
@@ -114,13 +118,10 @@ public class CombatStage : AbstractStage
 
     private IEnumerator _testCoroutine()
     {
-        while (!_ending)
+        while (_spawning)
         {
             // If period is negative, pause.
-            while (_testConfig == null || _testConfig.Interval <= 0)
-            {
-                yield return null;
-            }
+            yield return new WaitWhile(() => _testConfig == null || _testConfig.Interval <= 0);
             yield return new WaitForSeconds(_testConfig.Interval);
             LaunchTest();
         }
@@ -147,25 +148,19 @@ public class CombatStage : AbstractStage
         controller.DisableTrack = _testConfig.DisableTrackingY;
     }
 
-    private void _finishStage()
+    private IEnumerator _finishStage()
+    {
+        _spawning = false;
+        yield return new WaitWhile(() => GameObject.FindGameObjectWithTag("Assignment") != null);
+        _running = false;
+    }
+
+    public override void Kill()
     {
         StopAllCoroutines();
-        _ending = true;
-        CheckEnd();
-    }
-
-    public void CheckEnd()
-    {
-        if (_ending && GameObject.FindWithTag("Assignment") == null)
-        {
-            // No more assignments on screen, end.
-            Invoke("End", EndDelay);
-        }
-    }
-
-    public override void End()
-    {
-        base.End();
+        _spawning = false;
+        _running = false;
+        gameObject.SetActive(false);
     }
 
     /// <summary>

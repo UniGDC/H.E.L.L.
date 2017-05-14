@@ -3,10 +3,11 @@ using UnityEngine;
 using System.Collections;
 
 
-public class LevelController : SingletonMonoBehaviour<LevelController>, IStageController
+public class LevelController : SingletonMonoBehaviour<LevelController>
 {
     private int _currentIndex;
     public AbstractStage[] Stages;
+    private Coroutine _stageCycler;
 
     private void Awake()
     {
@@ -21,46 +22,59 @@ public class LevelController : SingletonMonoBehaviour<LevelController>, IStageCo
 
     private void Start()
     {
-        StartNext();
+        _stageCycler = StartCoroutine(_runStages());
     }
 
-    public void EndCurrent()
+    private IEnumerator _runStages()
     {
-        _currentIndex++;
-
-        if (_currentIndex >= Stages.Length)
+        for (; _currentIndex < Stages.Length; _currentIndex++)
         {
-            gameObject.SetActive(false);
+            Stages[_currentIndex].gameObject.SetActive(true);
+            yield return StartCoroutine(Stages[_currentIndex].Run());
+            Stages[_currentIndex].gameObject.SetActive(false);
         }
     }
 
-    public void StartNext()
-    {
-        if (_currentIndex < Stages.Length)
-        {
-            Stages[_currentIndex].ParentController = this;
-            Stages[_currentIndex].Begin();
-        }
-        else
-        {
-            // No point keeping this canvas anymore
-            gameObject.SetActive(false);
-        }
-    }
+//    public void EndCurrent()
+//    {
+//        _currentIndex++;
+//
+//        if (_currentIndex >= Stages.Length)
+//        {
+//            gameObject.SetActive(false);
+//        }
+//    }
+//
+//    public void StartNext()
+//    {
+//        if (_currentIndex < Stages.Length)
+//        {
+//            Stages[_currentIndex].ParentController = this;
+//            Stages[_currentIndex].Run();
+//        }
+//        else
+//        {
+//            // No point keeping this canvas anymore
+//            gameObject.SetActive(false);
+//        }
+//    }
 
     public void SkipToStage(int stageIndex)
     {
+        StopCoroutine(_stageCycler);
         foreach (AbstractStage stage in Stages)
         {
-            stage.gameObject.SetActive(false);
+            stage.Kill();
         }
+
         _currentIndex = stageIndex;
-        StartNext();
+        _stageCycler = StartCoroutine(_runStages());
     }
 
-    public void Continue()
-    {
-        EndCurrent();
-        StartNext();
-    }
+//
+//    public void Continue()
+//    {
+//        EndCurrent();
+//        StartNext();
+//    }
 }

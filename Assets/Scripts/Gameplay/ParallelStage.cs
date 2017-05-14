@@ -1,31 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ParallelStageManager : AbstractStage, IStageController
+public class ParallelStageManager : AbstractStage
 {
     public AbstractStage[] ParallelStages;
+    private Coroutine[] _stageCoroutines;
 
-    public override void Begin()
+    public override IEnumerator Run()
     {
-        base.Begin();
+        _stageCoroutines = new Coroutine[ParallelStages.Length];
 
-        foreach (AbstractStage stage in ParallelStages)
+        for (int i = 0; i < ParallelStages.Length; i++)
         {
-            stage.ParentController = this;
-            stage.Begin();
+            _stageCoroutines[i] = StartCoroutine(ParallelStages[i].Run());
+        }
+
+        foreach (Coroutine stageCoroutine in _stageCoroutines)
+        {
+            yield return stageCoroutine;
         }
     }
 
-    public void Continue()
+    public override void Kill()
     {
         foreach (AbstractStage stage in ParallelStages)
         {
-            if (stage.Running)
-            {
-                return;
-            }
+            stage.Kill();
         }
-
-        End();
     }
 }
