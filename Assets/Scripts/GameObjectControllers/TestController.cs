@@ -34,52 +34,41 @@ public class TestController : AbstractAssignmentController
             _tracking = false;
         }
 
+        Rigidbody2D body = gameObject.GetComponent<Rigidbody2D>();
+        float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
+
         if (_tracking)
         {
-            float projectedX = PlayerController.Instance.gameObject.transform.position.x /
-                               (PlayerController.Instance.gameObject.transform.position.y - CombatStage.VanishingPoint.y) *
-                               (gameObject.transform.position.y - CombatStage.VanishingPoint.y);
-            float differenceX = projectedX - gameObject.transform.position.x;
+            // Apply a force proportional to the distance between the projected intercept x coordinate and the player's current x coordinate
+            float projectedX = (PlayerController.Instance.gameObject.transform.position.y - gameObject.transform.position.y) *
+                               body.velocity.x / body.velocity.y;
+            float differenceX = projectedX - PlayerController.Instance.gameObject.transform.position.x;
 
-            if (differenceX > 0)
-            {
-                gameObject.GetComponent<Rigidbody2D>()
-                    .AddForce(CombatStage.GetPerspectiveTransformationMatrix(gameObject.transform.position)
-                        .MultiplyVector(new Vector2(TrackingStrength, 0)));
-            }
-            else if (differenceX < 0)
-            {
-                gameObject.GetComponent<Rigidbody2D>()
-                    .AddForce(CombatStage.GetPerspectiveTransformationMatrix(gameObject.transform.position)
-                        .MultiplyVector(new Vector2(-TrackingStrength, 0)));
-            }
+            body.AddForce(CombatStage.GetPerspectiveTransformationMatrix(gameObject.transform.position)
+                .MultiplyVector(new Vector2(-TrackingStrength * differenceX / halfWidth, 0)));
         }
 
         Matrix4x4 transformation = CombatStage.GetPerspectiveTransformationMatrix(gameObject.transform.position);
 
-        float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
         float scaledWidth = halfWidth / (CombatStage.VanishingPoint.y - PlayerController.Instance.gameObject.transform.position.y) *
                             (CombatStage.VanishingPoint.y - gameObject.transform.position.y);
 
         if (gameObject.transform.position.x < -scaledWidth)
         {
             gameObject.transform.position = new Vector2(-scaledWidth, gameObject.transform.position.y);
-            gameObject.GetComponent<Rigidbody2D>().velocity =
-                transformation.MultiplyVector(new Vector2(0, -VerticalSpeed));
+            body.velocity = transformation.MultiplyVector(new Vector2(0, -VerticalSpeed));
         }
         else if (gameObject.transform.position.x > scaledWidth)
         {
             gameObject.transform.position = new Vector2(scaledWidth, gameObject.transform.position.y);
-            gameObject.GetComponent<Rigidbody2D>().velocity =
-                transformation.MultiplyVector(new Vector2(0, -VerticalSpeed));
+            body.velocity = transformation.MultiplyVector(new Vector2(0, -VerticalSpeed));
         }
         else
         {
             // Revert perspective transformation of velocity
             Vector2 velocity = transformation.inverse.MultiplyVector(gameObject.GetComponent<Rigidbody2D>().velocity);
             // Clamp horizontal speed
-            gameObject.GetComponent<Rigidbody2D>().velocity =
-                transformation.MultiplyVector(new Vector2(Mathf.Clamp(velocity.x, -HorizontalSpeed, HorizontalSpeed), -VerticalSpeed));
+            body.velocity = transformation.MultiplyVector(new Vector2(Mathf.Clamp(velocity.x, -HorizontalSpeed, HorizontalSpeed), -VerticalSpeed));
         }
     }
 }
