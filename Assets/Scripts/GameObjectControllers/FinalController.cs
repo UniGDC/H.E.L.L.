@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
+// Currently not used as the design for finals is still work in progress
 public class FinalController : MonoBehaviour
 {
     /// <summary>

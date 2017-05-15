@@ -15,20 +15,29 @@ public class Dialogue : AbstractStage
 
     public Text Continue;
 
-    protected override void Awake()
+    protected override void _init()
     {
-        base.Awake();
-        // For future reference: may read from files here.
         _text = Content.text;
         Content.text = "";
+        base._init();
     }
 
-    public override IEnumerator Run()
+    protected override void _reinit()
     {
+        StopAllCoroutines();
         _currentIndex = 0;
+        Continue.enabled = false;
+        Content.enabled = false;
+        CharacterPortrait.enabled = false;
+    }
+
+    protected override IEnumerator _run()
+    {
         CharacterPortrait.enabled = true;
         Content.enabled = true;
         yield return StartCoroutine(_print());
+        // This wait here is to prevent the immediate activation of the last WaitUntil when the player clicks to skip animation.
+        yield return new WaitForEndOfFrame();
         yield return new WaitUntil(() => Input.GetMouseButtonDown(0));
     }
 
@@ -44,23 +53,6 @@ public class Dialogue : AbstractStage
         Content.text = _text;
         Continue.enabled = true;
     }
-
-//    private void Advance()
-//    {
-//        // Check if finished printing
-//        if (_currentIndex >= _text.Length)
-//        {
-//            Content.text = _text.Substring(0, _currentIndex);
-//            _printingFinished = true;
-//            Continue.enabled = true;
-//
-//            CancelInvoke("Advance");
-//            return;
-//        }
-//
-//        _currentIndex++;
-//        Content.text = _text.Substring(0, _currentIndex);
-//    }
 
     private void _jumpToFinish()
     {
@@ -79,15 +71,6 @@ public class Dialogue : AbstractStage
         {
             _jumpToFinish();
         }
-    }
-
-    public override void Kill()
-    {
-        StopAllCoroutines();
-        Continue.enabled = false;
-        Content.enabled = false;
-        CharacterPortrait.enabled = false;
-        gameObject.SetActive(false);
     }
 
     private void OnDisable()

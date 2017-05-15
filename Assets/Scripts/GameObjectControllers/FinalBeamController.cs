@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// Currently not used
 public class FinalBeamController : MonoBehaviour
 {
     /// <summary>

@@ -14,6 +14,9 @@ public class CombatStage : AbstractStage
 
     public static readonly Vector2 VanishingPoint = new Vector2(0, 7.5F);
 
+    /// <summary>
+    /// Configuration for homework spawning
+    /// </summary>
     [Serializable]
     public class HomeworkSpawnerConfig
     {
@@ -23,6 +26,9 @@ public class CombatStage : AbstractStage
         public float SpeedModifier;
     }
 
+    /// <summary>
+    /// Configuration for test spawning
+    /// </summary>
     [Serializable]
     public class TestSpawnerConfig
     {
@@ -33,9 +39,13 @@ public class CombatStage : AbstractStage
         public float DisableTrackingY;
     }
 
+    // The current homework and test spawning configs
     private HomeworkSpawnerConfig _homeworkConfig;
     private TestSpawnerConfig _testConfig;
 
+    /// <summary>
+    /// Overall configuration phase container class
+    /// </summary>
     [Serializable]
     public class SpawnerConfig
     {
@@ -48,24 +58,26 @@ public class CombatStage : AbstractStage
 
     public float EndDelay;
 
-    private Coroutine _homeworkSpawner;
-    private Coroutine _testSpawner;
     private bool _spawning;
-    private bool _running;
+
+    protected override void _reinit()
+    {
+        StopAllCoroutines();
+        _spawning = false;
+    }
 
     // Use this for initialization
-    public override IEnumerator Run()
+    protected override IEnumerator _run()
     {
-        _running = true;
         _spawning = true;
         // Start the config updating coroutine
         StartCoroutine(_startUpdate());
 
         // Start homework and test spawning coroutine
-        _homeworkSpawner = StartCoroutine(_homeworkCoroutine());
-        _testSpawner = StartCoroutine(_testCoroutine());
+        StartCoroutine(_homeworkCoroutine());
+        StartCoroutine(_testCoroutine());
 
-        yield return new WaitWhile(() => _running);
+        yield return new WaitWhile(() => Running);
     }
 
     private IEnumerator _startUpdate()
@@ -150,17 +162,12 @@ public class CombatStage : AbstractStage
 
     private IEnumerator _finishStage()
     {
+        // Turn off spawning
         _spawning = false;
-        yield return new WaitWhile(() => GameObject.FindGameObjectWithTag("Assignment") != null);
-        _running = false;
-    }
-
-    public override void Kill()
-    {
-        StopAllCoroutines();
-        _spawning = false;
-        _running = false;
-        gameObject.SetActive(false);
+        // Wait until there are no more assignments in the game
+        yield return new WaitUntil(() => GameObject.FindGameObjectWithTag("Assignment") == null);
+        // Trigger the ending of this stage
+        Running = false;
     }
 
     /// <summary>

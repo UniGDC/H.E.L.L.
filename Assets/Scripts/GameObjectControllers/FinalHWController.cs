@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// Currently not used
 public class FinalHWController : MonoBehaviour
 {
     public Vector3 Waypoint;
