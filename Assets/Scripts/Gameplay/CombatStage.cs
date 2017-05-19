@@ -58,7 +58,7 @@ public class CombatStage : AbstractStage
 
     public float EndDelay;
 
-    private bool _spawning;
+    protected bool _spawning;
 
     protected override void _reinit()
     {
@@ -70,17 +70,16 @@ public class CombatStage : AbstractStage
     protected override IEnumerator _run()
     {
         _spawning = true;
-        // Start the config updating coroutine
-        StartCoroutine(_startUpdate());
 
         // Start homework and test spawning coroutine
         StartCoroutine(_homeworkCoroutine());
         StartCoroutine(_testCoroutine());
 
-        yield return new WaitWhile(() => Running);
+        // Start the config updating coroutine
+        yield return StartCoroutine(_startUpdate());
     }
 
-    private IEnumerator _startUpdate()
+    protected virtual IEnumerator _startUpdate()
     {
         // Use a foreach to loop through all the configs one by one
         foreach (SpawnerConfig config in Configs)
@@ -90,11 +89,10 @@ public class CombatStage : AbstractStage
             // Wait for the given amount of time, and then continue with the loop to access the next config
             yield return new WaitForSeconds(config.Time);
         }
-        // TODO
-        StartCoroutine(_finishStage());
+        yield return StartCoroutine(_finishStage());
     }
 
-    private IEnumerator _homeworkCoroutine()
+    protected virtual IEnumerator _homeworkCoroutine()
     {
         while (_spawning)
         {
@@ -105,7 +103,7 @@ public class CombatStage : AbstractStage
         }
     }
 
-    private void LaunchHomework()
+    protected virtual void LaunchHomework()
     {
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
 
@@ -128,7 +126,7 @@ public class CombatStage : AbstractStage
         }
     }
 
-    private IEnumerator _testCoroutine()
+    protected virtual IEnumerator _testCoroutine()
     {
         while (_spawning)
         {
@@ -139,7 +137,7 @@ public class CombatStage : AbstractStage
         }
     }
 
-    private void LaunchTest()
+    protected virtual void LaunchTest()
     {
         GameObject newTest = Instantiate(TestPrefab);
         newTest.transform.parent = Spawned.Instance.gameObject.transform;
@@ -160,14 +158,13 @@ public class CombatStage : AbstractStage
         controller.DisableTrack = _testConfig.DisableTrackingY;
     }
 
-    private IEnumerator _finishStage()
+    protected virtual IEnumerator _finishStage()
     {
         // Turn off spawning
         _spawning = false;
+        yield return new WaitForEndOfFrame();
         // Wait until there are no more assignments in the game
         yield return new WaitUntil(() => GameObject.FindGameObjectWithTag("Assignment") == null);
-        // Trigger the ending of this stage
-        Running = false;
     }
 
     /// <summary>
@@ -187,6 +184,8 @@ public class CombatStage : AbstractStage
         transformationMatrix[0, 0] = scale;
         // Transformed j
         transformationMatrix.SetColumn(1, toVanishingPoint);
+
+        // Set the other 2 rows so that the matrix actually works
         transformationMatrix[2, 2] = 1;
         transformationMatrix[3, 3] = 1;
         return transformationMatrix;

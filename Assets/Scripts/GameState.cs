@@ -15,6 +15,8 @@ public class GameState : SingletonMonoBehaviour<GameState>
         /// If true, when the player fails a level, the entire game is reset.
         /// </summary>
         public bool Hardcore;
+
+        public int Kudos;
     }
 
     public PlayerData Data = new PlayerData();
