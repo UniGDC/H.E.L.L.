@@ -1,57 +1,27 @@
 ﻿using System;
-using UnityEngine;
-using System.Collections;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography;
+using UnityEngine.Analytics;
 
-public class GameState : MonoBehaviour
+public class GameState : SingletonMonoBehaviour<GameState>
 {
     [Serializable]
     public class PlayerData
     {
-        public int Level;
-        public int Difficulty;
-    }
+        public Gender PlayerSex;
 
-    public static GameState State;
+        public int Level; // 0-indexed.
+        public int Difficulty; // TODO
+
+        /// <summary>
+        /// If true, when the player fails a level, the entire game is reset.
+        /// </summary>
+        public bool Hardcore;
+    }
 
     public PlayerData Data = new PlayerData();
 
     // Use this for initialization
-    void Awake()
+    private void Awake()
     {
-        // Assign state if not assigned
-        if (State == null)
-        {
-            State = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        // THERE CAN ONLY BE ONE
-        else if (State != this)
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    public void Save()
-    {
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream fs = File.Open(Application.persistentDataPath + "/save.dat", FileMode.OpenOrCreate);
-
-        bf.Serialize(fs, Data);
-        fs.Close();
-    }
-
-    public void Load()
-    {
-        if (File.Exists(Application.persistentDataPath + "/save.dat"))
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream fs = File.Open(Application.persistentDataPath + "/save.dat", FileMode.Open);
-
-            Data = (PlayerData) bf.Deserialize(fs);
-            fs.Close();
-        }
+        Instance = this;
     }
 }

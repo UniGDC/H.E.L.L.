@@ -14,7 +14,7 @@ public class PlayerHealthController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-//        Health = MaxHealth;
+        Health = MaxHealth;
     }
 
     // Update is called once per frame
@@ -25,27 +25,26 @@ public class PlayerHealthController : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.gameObject.tag.Equals("Assignment")) return;
-        HealthBar.LoseOneHeart();
-//        Health -= 1;
+        Health -= other.gameObject.GetComponent<AbstractAssignmentController>().Damage;
         Destroy(other.gameObject);
     }
 
-//    public int Health
-//    {
-//        get { return _currentHealth; }
-//        set
-//        {
-//            _currentHealth = Mathf.Clamp(value, 0, MaxHealth);
-//            HealthBar.SetHealth(_currentHealth);
-//
-//            if (_currentHealth > MaxHealth)
-//            {
-//                _currentHealth = MaxHealth;
-//            }
-//            else if (_currentHealth <= 0)
-//            {
-//                // TODO Implement fail mechanism
-//            }
-//        }
-//    }
+    public int Health
+    {
+        get { return _currentHealth; }
+        set
+        {
+            _currentHealth = Mathf.Clamp(value, 0, MaxHealth);
+            HealthBar.SetHealth(_currentHealth);
+
+            if (_currentHealth > MaxHealth)
+            {
+                _currentHealth = MaxHealth;
+            }
+            else if (_currentHealth <= 0)
+            {
+                // TODO Implement fail mechanism
+            }
+        }
+    }
 }

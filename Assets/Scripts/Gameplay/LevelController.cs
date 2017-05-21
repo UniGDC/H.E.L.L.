@@ -3,71 +3,78 @@ using UnityEngine;
 using System.Collections;
 
 
-public class LevelController : MonoBehaviour
+public class LevelController : SingletonMonoBehaviour<LevelController>
 {
-    public static LevelController Controller;
-
     private int _currentIndex;
-    public AbstractGameplayStage[] Stages;
+    public AbstractStage[] Stages;
+    private Coroutine _stageCycler;
 
     private void Awake()
     {
-        if (Controller == null)
-        {
-            Controller = this;
-        }
-        else if (Controller != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        Instance = this;
 
         if (Stages == null || Stages.Length == 0)
         {
-            Stages = gameObject.GetComponentsInChildren<AbstractGameplayStage>();
+            Stages = gameObject.GetComponentsInChildren<AbstractStage>();
         }
         _currentIndex = 0;
     }
 
     private void Start()
     {
-        StartNext();
+        _stageCycler = StartCoroutine(_runStages());
     }
 
-    public void EndCurrent()
+    private IEnumerator _runStages()
     {
-        _currentIndex++;
-
-        if (_currentIndex >= Stages.Length)
+        for (; _currentIndex < Stages.Length; _currentIndex++)
         {
-            gameObject.SetActive(false);
+            Stages[_currentIndex].gameObject.SetActive(true);
+            yield return StartCoroutine(Stages[_currentIndex].Run());
+            Stages[_currentIndex].gameObject.SetActive(false);
         }
     }
 
-    public void StartNext()
+//    public void EndCurrent()
+//    {
+//        _currentIndex++;
+//
+//        if (_currentIndex >= Stages.Length)
+//        {
+//            gameObject.SetActive(false);
+//        }
+//    }
+//
+//    public void StartNext()
+//    {
+//        if (_currentIndex < Stages.Length)
+//        {
+//            Stages[_currentIndex].ParentController = this;
+//            Stages[_currentIndex].Run();
+//        }
+//        else
+//        {
+//            // No point keeping this canvas anymore
+//            gameObject.SetActive(false);
+//        }
+//    }
+
+    public void SkipToStage(int stageIndex)
     {
-        if (_currentIndex < Stages.Length)
+        StopCoroutine(_stageCycler);
+        foreach (AbstractStage stage in Stages)
         {
-            Stages[_currentIndex].Begin();
+            stage.Kill();
         }
-        else
-        {
-            // No point keeping this canvas anymore
-            gameObject.SetActive(false);
-        }
+
+        _currentIndex = stageIndex;
+        _stageCycler = StartCoroutine(_runStages());
     }
 
-    public void Continue()
-    {
-        EndCurrent();
-        StartNext();
-    }
-
-    private void OnDestroy()
-    {
-        if (Controller == this)
-        {
-            Controller = null;
-        }
-    }
+//
+//    public void Continue()
+//    {
+//        EndCurrent();
+//        StartNext();
+//    }
 }

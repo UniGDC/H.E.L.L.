@@ -1,149 +1,166 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class CombatStage : AbstractGameplayStage
+public class CombatStage : AbstractStage
 {
     public GameObject HomeworkPrefab;
     public GameObject TestPrefab;
     public GameObject FinalPrefab;
 
-    private int _currentClicks;
-    private bool _clickGoalReached;
-
     public static readonly Vector2 VanishingPoint = new Vector2(0, 7.5F);
 
-    public float HomeworkSpeedModifier;
-    public float HomeworkInterval;
-    public int HomeworkLaneCount = 7;
-    public int HomeworkPackSize;
+    [Serializable]
+    public class HomeworkSpawnerConfig
+    {
+        public float Interval;
+        public int PackSize;
+        public int LaneCount = 7;
+        public float SpeedModifier;
+    }
 
-    public float TestHorizontalSpeedModifier;
-    public float TestVerticalSpeedModifier;
-    public float TestTrackingStrength;
-    public float TestDisableTrackingY;
-    public float TestInterval;
+    [Serializable]
+    public class TestSpawnerConfig
+    {
+        public float Interval;
+        public float HorizontalSpeedModifier;
+        public float VerticalSpeedModifier;
+        public float TrackingStrength;
+        public float DisableTrackingY;
+    }
 
-    // End conditions. The combat stage will end if any one of these set conditions is met.
-    public float TimeLimit;
+    private HomeworkSpawnerConfig _homeworkConfig;
+    private TestSpawnerConfig _testConfig;
 
-    private float _startTime;
-    public int HomeworkLimit;
-    private int _homeworkCount;
-    public int TestLimit;
-    private int _testCount;
+    [Serializable]
+    public class SpawnerConfig
+    {
+        public float Time;
+        public HomeworkSpawnerConfig HomeworkConfig;
+        public TestSpawnerConfig TestConfig;
+    }
 
-    public bool EndImmediately = false;
+    public SpawnerConfig[] Configs;
+
     public float EndDelay;
-    private bool _ending;
+
+    private Coroutine _homeworkSpawner;
+    private Coroutine _testSpawner;
+    private bool _spawning;
+    private bool _running;
 
     // Use this for initialization
-    public override void Begin()
+    public override IEnumerator Run()
     {
-        base.Begin();
+        _running = true;
+        _spawning = true;
+        // Start the config updating coroutine
+        StartCoroutine(_startUpdate());
 
-        if (HomeworkInterval > 0)
+        // Start homework and test spawning coroutine
+        _homeworkSpawner = StartCoroutine(_homeworkCoroutine());
+        _testSpawner = StartCoroutine(_testCoroutine());
+
+        yield return new WaitWhile(() => _running);
+    }
+
+    private IEnumerator _startUpdate()
+    {
+        // Use a foreach to loop through all the configs one by one
+        foreach (SpawnerConfig config in Configs)
         {
-            InvokeRepeating("LaunchHomework", HomeworkInterval, HomeworkInterval);
+            _homeworkConfig = config.HomeworkConfig;
+            _testConfig = config.TestConfig;
+            // Wait for the given amount of time, and then continue with the loop to access the next config
+            yield return new WaitForSeconds(config.Time);
         }
-        if (TestInterval > 0)
+        // TODO
+        StartCoroutine(_finishStage());
+    }
+
+    private IEnumerator _homeworkCoroutine()
+    {
+        while (_spawning)
         {
-            InvokeRepeating("LaunchTest", TestInterval, TestInterval);
+            // If period is negative, pause.
+            yield return new WaitWhile(() => _homeworkConfig == null || _homeworkConfig.Interval <= 0);
+            yield return new WaitForSeconds(_homeworkConfig.Interval);
+            LaunchHomework();
         }
-
-        _startTime = Time.time;
-        _homeworkCount = 0;
-        _testCount = 0;
-
-        _ending = false;
     }
 
     private void LaunchHomework()
     {
-        _homeworkCount++;
-
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
 
-        float targetY = PlayerController.Player.transform.position.y;
+        float targetY = PlayerController.Instance.gameObject.transform.position.y;
         float startY = Camera.main.orthographicSize + HomeworkPrefab.GetComponent<SpriteRenderer>().bounds.size.y / 2;
 
         // Assign target
-        int[] targetIndices = MathFuncs.RandomDistictArray(HomeworkPackSize, 0, HomeworkLaneCount);
+        int[] targetIndices = MathFuncs.RandomDistictArray(_homeworkConfig.PackSize, 0, _homeworkConfig.LaneCount);
         foreach (int index in targetIndices)
         {
-            float targetX = -halfWidth + halfWidth * (2 * index + 1) / HomeworkLaneCount;
+            float targetX = -halfWidth + halfWidth * (2 * index + 1) / _homeworkConfig.LaneCount;
             float startX = targetX / (VanishingPoint.y - targetY) * (VanishingPoint.y - startY);
             GameObject newHomework = Instantiate(HomeworkPrefab);
+            newHomework.transform.parent = Spawned.Instance.gameObject.transform;
 
             newHomework.transform.position = new Vector3(startX, startY);
             newHomework.GetComponent<HomeworkController>().Parent = this;
             newHomework.GetComponent<HomeworkController>().Target = new Vector3(targetX, targetY);
-            newHomework.GetComponent<HomeworkController>().SpeedModifier = HomeworkSpeedModifier;
+            newHomework.GetComponent<HomeworkController>().SpeedModifier = _homeworkConfig.SpeedModifier;
         }
+    }
 
-        _checkEnd();
+    private IEnumerator _testCoroutine()
+    {
+        while (_spawning)
+        {
+            // If period is negative, pause.
+            yield return new WaitWhile(() => _testConfig == null || _testConfig.Interval <= 0);
+            yield return new WaitForSeconds(_testConfig.Interval);
+            LaunchTest();
+        }
     }
 
     private void LaunchTest()
     {
-        _testCount++;
-
         GameObject newTest = Instantiate(TestPrefab);
+        newTest.transform.parent = Spawned.Instance.gameObject.transform;
 
         // Assign starting screenPosition
-        float targetY = PlayerController.Player.transform.position.y;
+        float targetY = PlayerController.Instance.gameObject.transform.position.y;
         float startY = Camera.main.orthographicSize + TestPrefab.GetComponent<SpriteRenderer>().bounds.size.y / 2;
-        float targetX = PlayerController.Player.transform.position.x;
+        float targetX = PlayerController.Instance.gameObject.transform.position.x;
         float startX = targetX / (VanishingPoint.y - targetY) * (VanishingPoint.y - startY);
 
         newTest.transform.position = new Vector2(startX, startY);
 
         TestController controller = newTest.GetComponent<TestController>();
         controller.Parent = this;
-        controller.HorizontalSpeed = TestHorizontalSpeedModifier;
-        controller.VerticalSpeed = TestVerticalSpeedModifier;
-        controller.TrackingStrength = TestTrackingStrength;
-        controller.DisableTrack = TestDisableTrackingY;
-
-        _checkEnd();
+        controller.HorizontalSpeed = _testConfig.HorizontalSpeedModifier;
+        controller.VerticalSpeed = _testConfig.VerticalSpeedModifier;
+        controller.TrackingStrength = _testConfig.TrackingStrength;
+        controller.DisableTrack = _testConfig.DisableTrackingY;
     }
 
-    private void _checkEnd()
+    private IEnumerator _finishStage()
     {
-        if (TimeLimit > 0 && Time.time - _startTime >= TimeLimit || HomeworkLimit > 0 && _homeworkCount >= HomeworkLimit ||
-            TestLimit > 0 && _testCount >= TestLimit)
-        {
-            _finishStage();
-        }
+        _spawning = false;
+        yield return new WaitWhile(() => GameObject.FindGameObjectWithTag("Assignment") != null);
+        _running = false;
     }
 
-    private void _finishStage()
+    public override void Kill()
     {
-        CancelInvoke();
-        if (EndImmediately)
-        {
-            Invoke("End", EndDelay);
-        }
-        else
-        {
-            _ending = true;
-        }
-    }
-
-    public void OnAssignmentDestroyed()
-    {
-        if (_ending && GameObject.FindWithTag("Assignment") == null)
-        {
-            // No more assignments on screen, end.
-            Invoke("End", EndDelay);
-        }
-    }
-
-    public override void End()
-    {
-        base.End();
+        StopAllCoroutines();
+        _spawning = false;
+        _running = false;
+        gameObject.SetActive(false);
     }
 
     /// <summary>

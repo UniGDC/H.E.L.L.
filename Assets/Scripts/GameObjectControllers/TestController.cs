@@ -36,8 +36,8 @@ public class TestController : AbstractAssignmentController
 
         if (_tracking)
         {
-            float projectedX = PlayerController.Player.transform.position.x /
-                               (PlayerController.Player.transform.position.y - CombatStage.VanishingPoint.y) *
+            float projectedX = PlayerController.Instance.gameObject.transform.position.x /
+                               (PlayerController.Instance.gameObject.transform.position.y - CombatStage.VanishingPoint.y) *
                                (gameObject.transform.position.y - CombatStage.VanishingPoint.y);
             float differenceX = projectedX - gameObject.transform.position.x;
 
@@ -58,7 +58,7 @@ public class TestController : AbstractAssignmentController
         Matrix4x4 transformation = CombatStage.GetPerspectiveTransformationMatrix(gameObject.transform.position);
 
         float halfWidth = Camera.main.orthographicSize * Screen.width / Screen.height;
-        float scaledWidth = halfWidth / (CombatStage.VanishingPoint.y - PlayerController.Player.transform.position.y) *
+        float scaledWidth = halfWidth / (CombatStage.VanishingPoint.y - PlayerController.Instance.gameObject.transform.position.y) *
                             (CombatStage.VanishingPoint.y - gameObject.transform.position.y);
 
         if (gameObject.transform.position.x < -scaledWidth)

@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEngine.UI;
 using RangHo.DialogueScript;
 
-public class Dialogue : AbstractGameplayStage
+public class Dialogue : AbstractStage
 {
     public Image CharacterPortrait;
     public Text Content;
@@ -27,38 +27,46 @@ public class Dialogue : AbstractGameplayStage
         Content.text = "";
     }
 
-    public override void Begin()
+    public override IEnumerator Run()
     {
-        base.Begin();
+        _currentIndex = 0;
         CharacterPortrait.enabled = true;
         Content.enabled = true;
-        StartPrint();
+        yield return StartCoroutine(_print());
+        yield return new WaitUntil(() => Input.GetMouseButtonDown(0));
     }
 
-    private void StartPrint()
+    private IEnumerator _print()
     {
         _printingFinished = false;
-        InvokeRepeating("Advance", 0, PrintRate);
-    }
-
-    private void Advance()
-    {
-        // Check if finished printing
-        if (_currentIndex >= _text.Length)
+        for (; _currentIndex < _text.Length; _currentIndex++)
         {
             Content.text = _text.Substring(0, _currentIndex);
-            _printingFinished = true;
-            Continue.enabled = true;
-
-            CancelInvoke("Advance");
-            return;
+            yield return new WaitForSeconds(PrintRate);
         }
-
-        _currentIndex++;
-        Content.text = _text.Substring(0, _currentIndex);
+        _printingFinished = true;
+        Content.text = _text;
+        Continue.enabled = true;
     }
 
-    private void JumpToFinish()
+//    private void Advance()
+//    {
+//        // Check if finished printing
+//        if (_currentIndex >= _text.Length)
+//        {
+//            Content.text = _text.Substring(0, _currentIndex);
+//            _printingFinished = true;
+//            Continue.enabled = true;
+//
+//            CancelInvoke("Advance");
+//            return;
+//        }
+//
+//        _currentIndex++;
+//        Content.text = _text.Substring(0, _currentIndex);
+//    }
+
+    private void _jumpToFinish()
     {
         // Finish printing
         _currentIndex = _text.Length;
@@ -73,19 +81,21 @@ public class Dialogue : AbstractGameplayStage
 
         if (!_printingFinished)
         {
-            JumpToFinish();
-        }
-        else
-        {
-            End();
+            _jumpToFinish();
         }
     }
 
-    public override void End()
+    public override void Kill()
     {
-        CharacterPortrait.enabled = false;
-        Content.enabled = false;
+        StopAllCoroutines();
         Continue.enabled = false;
-        base.End();
+        Content.enabled = false;
+        CharacterPortrait.enabled = false;
+        gameObject.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        Continue.enabled = false;
     }
 }

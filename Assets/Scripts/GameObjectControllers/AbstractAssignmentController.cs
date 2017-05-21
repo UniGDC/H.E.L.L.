@@ -6,6 +6,8 @@ public class AbstractAssignmentController : MonoBehaviour
     public CombatStage Parent;
     private float _destroyPoint;
 
+    public int Damage = 1;
+
     private void Awake()
     {
         _destroyPoint = -Camera.main.orthographicSize - gameObject.GetComponent<Renderer>().bounds.size.y / 2;
@@ -17,10 +19,5 @@ public class AbstractAssignmentController : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
-
-    private void OnDestroy()
-    {
-        Parent.OnAssignmentDestroyed();
     }
 }
