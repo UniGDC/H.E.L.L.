@@ -1,4 +1,6 @@
-﻿Shader "Custom/GraidentShader" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Custom/GraidentShader" {
 Properties {
          [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
          _ColorLeft ("Left Color", Color) = (1,1,1,1)
@@ -31,7 +33,7 @@ Properties {
 
             v2f vert (appdata_full v) {
                 v2f o;
-                o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+                o.pos = UnityObjectToClipPos (v.vertex);
                 o.texcoord = v.texcoord;
                 return o;
             }
