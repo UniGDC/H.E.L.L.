@@ -1,0 +1,71 @@
+// Currently the custon JSON parser does not support block comments. Deal with it.
+// If you don't have an IDE you will probably want Notepad++ or Sublime Text to edit this.
+{
+    // This explains what each field does. This data is not actually used in-game.
+    "explain": [// Square brackets indicate an array. The program will go through each element in this array sequentially.
+        // First phase.
+        {
+            // How long this phase lasts, in seconds
+            "time": 30,
+            "homework": {
+                // Launch homework once every ??? seconds
+                "interval": 2,
+                // How many homeworks to spawn
+                "size": 2,
+                // How fast the homework moves
+                "speed": 2,
+                // Optional. How many lanes are available for homeworks.
+                "lanes": 7
+            },
+            "test": {
+                // One test every ??? seconds
+                "interval": 5,
+                // How fast, horizontally, the test is allowed to go
+                "horizontalSpeed": 2,
+                // How fast, vertically, the test is allowed to go
+                "verticalSpeed": 2,
+                // How strong the test's tracking force should be
+                "trackingStrength": 4,
+                // The Y coordinat at which the test will stop tracking the player
+                // -5 is the bottom of the screen, 5 is the top of the screen
+                "disableTracking": 0
+            }
+        },
+        // Second phase. This phase will be executed after the previous phase in this array.
+        {
+            "time": 30,
+            "homework": {
+                "interval": 2,
+                "size": 2,
+                "speed": 2,
+                "lanes": 7
+            },
+            "test": {
+                "interval": 5,
+                "horizontalSpeed": 2,
+                "verticalSpeed": 2,
+                "trackingStrength": 4,
+                "disableTracking": 0
+            }
+        }
+    ],
+    // The values used for the template level. Also serves as a template for other levels' data.
+    "template": [
+        {
+            "time": 30,
+            "homework": {
+                "interval": 2,
+                "size": 2,
+                "speed": 2,
+                "lanes": 7
+            },
+            "test": {
+                "interval": 5,
+                "horizontalSpeed": 2,
+                "verticalSpeed": 2,
+                "trackingStrength": 4,
+                "disableTracking": 0
+            }
+        }
+    ]
+}

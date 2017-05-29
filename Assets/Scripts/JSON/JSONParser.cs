@@ -1,15 +1,49 @@
 ﻿using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
-using NUnit.Framework;
+
 
 public class JSONParser
 {
+    // Cache parsed files to improve performance.
+    private static Dictionary<string, JSONParser> _parsed = new Dictionary<string, JSONParser>();
+
+    public static JSONParser ParseFile(string filePath)
+    {
+        if (_parsed.ContainsKey(filePath))
+        {
+            return _parsed[filePath];
+        }
+
+        // Read lines to allow better error messages.
+        StreamReader reader = File.OpenText(filePath);
+        LinkedList<string> lines = new LinkedList<string>();
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            lines.AddLast(line);
+        }
+
+        JSONParser parser = new JSONParser(lines.ToArray());
+        parser._parse();
+        _parsed[filePath] = parser;
+        return parser;
+    }
+
+    public static JSONParser ParseString(string[] json)
+    {
+        return new JSONParser(json);
+    }
+
     private int _lineIndex;
     private int _charIndex;
+
+    private readonly string[] _input;
+    public object Result { get; private set; }
+    private readonly IEnumerator<char> _charEnumerator;
 
     public class SyntaxError : Exception
     {
@@ -18,22 +52,6 @@ public class JSONParser
             : "Unexpected character at line " + parser._lineIndex + " character " + parser._charIndex + ": " +
               parser._input[parser._lineIndex][parser._charIndex])
         {
-        }
-    }
-
-    private readonly string[] _input;
-    private object _result;
-    private readonly IEnumerator<char> _charEnumerator;
-
-    private IEnumerator<char> _constructCharIterator()
-    {
-        for (_lineIndex = 0; _lineIndex < _input.Length; _lineIndex++)
-        {
-            string line = _input[_lineIndex];
-            for (_charIndex = 0; _charIndex < line.Length; _charIndex++)
-            {
-                yield return line[_charIndex];
-            }
         }
     }
 
@@ -51,12 +69,27 @@ public class JSONParser
         _charEnumerator = _constructCharIterator();
     }
 
+    private IEnumerator<char> _constructCharIterator()
+    {
+        for (_lineIndex = 0; _lineIndex < _input.Length; _lineIndex++)
+        {
+            string line = _input[_lineIndex];
+
+            for (_charIndex = 0; _charIndex < line.Length; _charIndex++)
+            {
+                yield return line[_charIndex];
+            }
+        }
+    }
+
     private void _parse()
     {
+        // Move through the start of the file
         _charEnumerator.MoveNext();
         _skipWhitespace();
+
         if (_charEnumerator.Current != '{' && _charEnumerator.Current != '[') throw new SyntaxError(this);
-        _result = _identifyAndParseObject();
+        Result = _identifyAndParseObject();
     }
 
     private object _identifyAndParseObject()
@@ -115,6 +148,9 @@ public class JSONParser
             }
         }
 
+        // Move past the closing bracket
+        _charEnumerator.MoveNext();
+
         return result;
     }
 
@@ -143,15 +179,29 @@ public class JSONParser
             }
         }
 
+        // Move past the closing bracket
+        _charEnumerator.MoveNext();
+
         return result;
     }
 
     private void _skipWhitespace()
     {
-        while (Char.IsWhiteSpace(_charEnumerator.Current))
+        while (Char.IsWhiteSpace(_charEnumerator.Current) || _checkComment())
         {
             _charEnumerator.MoveNext();
         }
+    }
+
+    private bool _checkComment()
+    {
+        if (_charEnumerator.Current == '/' && _charIndex < _input[_lineIndex].Length - 1 && _input[_lineIndex][_charIndex + 1] == '/')
+        {
+            // Skip to end of the line
+            _charIndex = _input[_lineIndex].Length - 1;
+            return true;
+        }
+        return false;
     }
 
     private string _parseString()
@@ -270,67 +320,6 @@ public class JSONParser
                 throw new SyntaxError(this);
             }
             _charEnumerator.MoveNext();
-        }
-    }
-
-    private class Tester
-    {
-        private static string DictionaryPrint(Dictionary<string, object> dictionary, string space = "")
-        {
-            string output = "";
-            foreach (KeyValuePair<string, object> entry in dictionary)
-            {
-                output += space + entry.Key + ": ";
-                if (entry.Value is Dictionary<string, object>)
-                    output += "\n" + DictionaryPrint((Dictionary<string, object>) entry.Value, space + "  ");
-                else if (entry.Value is List<object>)
-                    output += "\n" + ListPrint((List<object>) entry.Value, space + "  ");
-                else
-                    output += entry.Value + "\n";
-            }
-            return output;
-        }
-
-        private static string ListPrint(List<object> list, string space = "")
-        {
-            string output = "";
-            foreach (object entry in list)
-            {
-                if (entry is List<object>)
-                    output += ListPrint((List<object>) entry, space + "  ");
-                else if (entry is Dictionary<string, object>)
-                    output += DictionaryPrint((Dictionary<string, object>) entry, space + "  ");
-                else
-                    output += entry + "\n";
-            }
-            return output;
-        }
-
-        [Test]
-        public static void ParsingTest()
-        {
-            JSONParser parser = new JSONParser(new[]
-            {
-                "{",
-                "\"key1\": \"value1\"",
-                "\"key2\": \"value2\"",
-                "}"
-            });
-            parser._parse();
-
-            Assert.IsAssignableFrom<Dictionary<string, object>>(parser._result);
-            Console.WriteLine("Hello world!");
-            Console.WriteLine(DictionaryPrint((Dictionary<string, object>) parser._result));
-
-            // Using my json config file from another project
-            string input = File.OpenText(Directory.GetCurrentDirectory() + "\\config.json").ReadToEnd();
-            Console.WriteLine("Input: " + input);
-
-            parser = new JSONParser(input);
-            parser._parse();
-
-            Assert.IsAssignableFrom<Dictionary<string, object>>(parser._result);
-            Console.WriteLine(DictionaryPrint((Dictionary<string, object>) parser._result));
         }
     }
 }

@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using SimpleJson;
 using System.Linq;
 using UnityEngine.Events;
@@ -18,7 +19,6 @@ public class CombatStage : AbstractStage
     /// <summary>
     /// Configuration for homework spawning
     /// </summary>
-    [Serializable]
     public class HomeworkSpawnerConfig
     {
         public float Interval;
@@ -30,7 +30,6 @@ public class CombatStage : AbstractStage
     /// <summary>
     /// Configuration for test spawning
     /// </summary>
-    [Serializable]
     public class TestSpawnerConfig
     {
         public float Interval;
@@ -48,24 +47,78 @@ public class CombatStage : AbstractStage
     /// <summary>
     /// Overall configuration phase container class
     /// </summary>
-    [Serializable]
     public class SpawnerConfig
     {
         public float Time;
         public HomeworkSpawnerConfig HomeworkConfig;
         public TestSpawnerConfig TestConfig;
+
+        public static SpawnerConfig FromDictionary(Dictionary<string, object> data)
+        {
+            SpawnerConfig result = new SpawnerConfig();
+
+            // CAST EVERYTHING
+            result.Time = (float) data["time"];
+
+            Dictionary<string, object> homeworkData = (Dictionary<string, object>) data["homework"];
+            HomeworkSpawnerConfig homeworkConfig = new HomeworkSpawnerConfig();
+            homeworkConfig.Interval = (float) homeworkData["interval"];
+            homeworkConfig.PackSize = Convert.ToInt32(homeworkData["size"]);
+            homeworkConfig.SpeedModifier = (float) homeworkData["speed"];
+            if (homeworkData.ContainsKey("lanes"))
+            {
+                homeworkConfig.LaneCount = Convert.ToInt32(homeworkData["lanes"]);
+            }
+            result.HomeworkConfig = homeworkConfig;
+
+            Dictionary<string, object> testData = (Dictionary<string, object>) data["test"];
+            TestSpawnerConfig testConfig = new TestSpawnerConfig();
+            testConfig.Interval = (float) testData["interval"];
+            testConfig.HorizontalSpeedModifier = (float) testData["horizontalSpeed"];
+            testConfig.VerticalSpeedModifier = (float) testData["verticalSpeed"];
+            testConfig.TrackingStrength = (float) testData["trackingStrength"];
+            testConfig.DisableTrackingY = (float) testData["disableTracking"];
+            result.TestConfig = testConfig;
+
+            return result;
+        }
     }
 
-    public SpawnerConfig[] Configs;
+    /// <summary>
+    /// The path to the config data for this level. Should be dot-separated and points to a list.
+    /// Ex. "leve1.phase1"
+    /// </summary>
+    public string DataPath;
+
+    private SpawnerConfig[] _configs;
 
     public float EndDelay;
 
     protected bool Spawning;
 
-    private void Start()
+    protected override void _init()
     {
+        base._init();
+        
         // Read configs from json
-        // TODO
+        JSONParser parser = JSONParser.ParseFile(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "Assets"),
+            Path.Combine("Configs", "levels.json")));
+
+        // Navigate to data
+        string[] path = DataPath.Split(' ');
+        object current = parser.Result;
+        foreach (string key in path)
+        {
+            current = ((Dictionary<string, object>) current)[key];
+        }
+        List<object> phaseConfigs = (List<object>) current;
+
+        // Load configs
+        _configs = new SpawnerConfig[phaseConfigs.Count];
+        for (int i = 0; i < phaseConfigs.Count; i++)
+        {
+            _configs[i] = SpawnerConfig.FromDictionary((Dictionary<string, object>) phaseConfigs[i]);
+        }
     }
 
     protected override void _reinit()
@@ -89,7 +142,7 @@ public class CombatStage : AbstractStage
     protected virtual IEnumerator _startUpdate()
     {
         // Use a foreach to loop through all the configs one by one
-        foreach (SpawnerConfig config in Configs)
+        foreach (SpawnerConfig config in _configs)
         {
             _homeworkConfig = config.HomeworkConfig;
             _testConfig = config.TestConfig;
