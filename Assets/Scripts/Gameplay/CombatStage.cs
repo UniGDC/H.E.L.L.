@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleJson;
 using System.Linq;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -41,6 +42,7 @@ public class CombatStage : AbstractStage
 
     // The current homework and test spawning configs
     private HomeworkSpawnerConfig _homeworkConfig;
+
     private TestSpawnerConfig _testConfig;
 
     /// <summary>
@@ -58,18 +60,23 @@ public class CombatStage : AbstractStage
 
     public float EndDelay;
 
-    protected bool _spawning;
+    protected bool Spawning;
+
+    private void Start()
+    {
+        // Read configs from json
+        // TODO
+    }
 
     protected override void _reinit()
     {
         StopAllCoroutines();
-        _spawning = false;
+        Spawning = false;
     }
 
-    // Use this for initialization
     protected override IEnumerator _run()
     {
-        _spawning = true;
+        Spawning = true;
 
         // Start homework and test spawning coroutine
         StartCoroutine(_homeworkCoroutine());
@@ -94,7 +101,7 @@ public class CombatStage : AbstractStage
 
     protected virtual IEnumerator _homeworkCoroutine()
     {
-        while (_spawning)
+        while (Spawning)
         {
             // If period is negative, pause.
             yield return new WaitWhile(() => _homeworkConfig == null || _homeworkConfig.Interval <= 0);
@@ -128,7 +135,7 @@ public class CombatStage : AbstractStage
 
     protected virtual IEnumerator _testCoroutine()
     {
-        while (_spawning)
+        while (Spawning)
         {
             // If period is negative, pause.
             yield return new WaitWhile(() => _testConfig == null || _testConfig.Interval <= 0);
@@ -161,7 +168,7 @@ public class CombatStage : AbstractStage
     protected virtual IEnumerator _finishStage()
     {
         // Turn off spawning
-        _spawning = false;
+        Spawning = false;
         yield return new WaitForEndOfFrame();
         // Wait until there are no more assignments in the game
         yield return new WaitUntil(() => GameObject.FindGameObjectWithTag("Assignment") == null);
