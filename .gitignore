@@ -31,3 +31,7 @@ sysinfo.txt
 
 # Suppression Files
 GlobalSuppressions.cs
+
+# Unity DLLs
+UnityEngine.dll
+UnityEditor.dll

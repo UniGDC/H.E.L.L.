@@ -2,15 +2,19 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using RangHo.DialogueScript;
 
 public class Dialogue : AbstractStage
 {
     public Image CharacterPortrait;
     public Text Content;
+    
+    [NonSerialized]
+    public Interpreter DialogueInterpreter;
 
     public const float PrintRate = 0.02F;
-    private String _text;
-    private int _currentIndex;
+    private string _text;
+    private int _currentIndex = 0;
     private bool _printingFinished;
 
     public Text Continue;

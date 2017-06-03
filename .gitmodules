@@ -1,0 +1,3 @@
+[submodule "Assets/VSCode"]
+	path = Assets/VSCode
+	url = https://github.com/dotBunny/VSCode.git
